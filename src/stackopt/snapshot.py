@@ -6,6 +6,7 @@ from fractions import Fraction
 import json
 import os
 from pathlib import Path
+import stat
 import tempfile
 from typing import Literal, cast
 
@@ -188,17 +189,33 @@ def write_snapshot(path: Path, resolved: ResolvedCase) -> None:
     write_utf8_atomic(path, json.dumps(document, ensure_ascii=False, allow_nan=False, indent=2) + "\n")
 
 
+def _output_mode(path: Path) -> int:
+    """Keep an existing file's permissions, or apply the process umask to a new file.
+
+    NamedTemporaryFile creates owner-only files, and os.replace keeps that mode.
+    """
+    try:
+        return stat.S_IMODE(path.stat().st_mode)
+    except FileNotFoundError:
+        # os.umask can only be read by setting it. The CLI writes from one thread.
+        mask = os.umask(0)
+        os.umask(mask)
+        return 0o666 & ~mask
+
+
 def write_utf8_atomic(path: Path, content: str) -> None:
     """Publish complete UTF-8 text or preserve the previous destination."""
     temporary: Path | None = None
     try:
         encoded = content.encode("utf-8")
+        mode = _output_mode(path)
         with tempfile.NamedTemporaryFile(mode="wb", dir=path.parent, prefix=".stackopt-",
                                          suffix=".tmp", delete=False) as stream:
             temporary = Path(stream.name)
             stream.write(encoded)
             stream.flush()
             os.fsync(stream.fileno())
+        os.chmod(temporary, mode)
         os.replace(temporary, path)
         temporary = None
     except (OSError, ValueError) as exc:

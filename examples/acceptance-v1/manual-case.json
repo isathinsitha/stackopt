@@ -1,0 +1,211 @@
+{
+  "kind": "case",
+  "schema_version": 1,
+  "case_id": "reference-bore-shaft",
+  "scope": "single_chain",
+  "chain": {
+    "id": "diametral-clearance",
+    "terms": [
+      {
+        "logical_id": "bore",
+        "coefficient": "1"
+      },
+      {
+        "logical_id": "shaft",
+        "coefficient": "-1"
+      }
+    ]
+  },
+  "requirement": {
+    "id": "running-clearance",
+    "minimum": {
+      "value": "0.05",
+      "unit": "mm"
+    },
+    "maximum": {
+      "value": "0.15",
+      "unit": "mm"
+    }
+  },
+  "model": {
+    "kind": "linear_free_expansion",
+    "reference": {
+      "value": "20",
+      "unit": "degC"
+    },
+    "operating_min": {
+      "value": "253.15",
+      "unit": "K"
+    },
+    "operating_max": {
+      "value": "60",
+      "unit": "degC"
+    }
+  },
+  "dimensions": [
+    {
+      "logical_id": "bore",
+      "physical_id": "fixture-bore-1",
+      "callout": {
+        "document_id": "synthetic-bore-drawing",
+        "dimension_id": "bore-diameter",
+        "revision": "A",
+        "configuration": "Benchmark"
+      },
+      "alpha": {
+        "value": "0.000023",
+        "unit": "1/K"
+      },
+      "nominal": {
+        "kind": "manual",
+        "length": {
+          "value": "20.1",
+          "unit": "mm"
+        },
+        "source_ref": "StackOpt architecture benchmark"
+      },
+      "tolerance": {
+        "kind": "manual",
+        "deviations": {
+          "lower": {
+            "value": "-0.025",
+            "unit": "mm"
+          },
+          "upper": {
+            "value": "0.025",
+            "unit": "mm"
+          }
+        },
+        "source_ref": "synthetic bore drawing A"
+      }
+    },
+    {
+      "logical_id": "shaft",
+      "physical_id": "fixture-shaft-1",
+      "callout": {
+        "document_id": "synthetic-shaft-drawing",
+        "dimension_id": "shaft-diameter",
+        "revision": "A",
+        "configuration": "Benchmark"
+      },
+      "alpha": {
+        "value": "0.000012",
+        "unit": "1/K"
+      },
+      "nominal": {
+        "kind": "manual",
+        "length": {
+          "value": "20",
+          "unit": "mm"
+        },
+        "source_ref": "StackOpt architecture benchmark"
+      },
+      "tolerance": {
+        "kind": "manual",
+        "deviations": {
+          "lower": {
+            "value": "-0.025",
+            "unit": "mm"
+          },
+          "upper": {
+            "value": "0.025",
+            "unit": "mm"
+          }
+        },
+        "source_ref": "synthetic shaft drawing A"
+      }
+    }
+  ],
+  "option_groups": [
+    {
+      "callout": {
+        "document_id": "synthetic-bore-drawing",
+        "dimension_id": "bore-diameter",
+        "revision": "A",
+        "configuration": "Benchmark"
+      },
+      "options": [
+        {
+          "id": "bore-baseline",
+          "deviations": {
+            "lower": {
+              "value": "-0.025",
+              "unit": "mm"
+            },
+            "upper": {
+              "value": "0.025",
+              "unit": "mm"
+            }
+          },
+          "score": {
+            "value": "0"
+          }
+        },
+        {
+          "id": "bore-tight",
+          "deviations": {
+            "lower": {
+              "value": "-0.015",
+              "unit": "mm"
+            },
+            "upper": {
+              "value": "0.015",
+              "unit": "mm"
+            }
+          },
+          "score": {
+            "value": "1"
+          }
+        }
+      ]
+    },
+    {
+      "callout": {
+        "document_id": "synthetic-shaft-drawing",
+        "dimension_id": "shaft-diameter",
+        "revision": "A",
+        "configuration": "Benchmark"
+      },
+      "options": [
+        {
+          "id": "shaft-baseline",
+          "deviations": {
+            "lower": {
+              "value": "-0.025",
+              "unit": "mm"
+            },
+            "upper": {
+              "value": "0.025",
+              "unit": "mm"
+            }
+          },
+          "score": {
+            "value": "0"
+          }
+        },
+        {
+          "id": "shaft-tight",
+          "deviations": {
+            "lower": {
+              "value": "-0.01",
+              "unit": "mm"
+            },
+            "upper": {
+              "value": "0.01",
+              "unit": "mm"
+            }
+          },
+          "score": {
+            "value": "3"
+          }
+        }
+      ]
+    }
+  ],
+  "objective": {
+    "basis": "synthetic_penalty",
+    "unit": "point",
+    "source_ref": "StackOpt architecture benchmark",
+    "context": "Illustrative additive penalties; no supplier or manufacturing cost claim."
+  }
+}

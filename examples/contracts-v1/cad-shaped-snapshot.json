@@ -1,0 +1,90 @@
+{
+  "kind": "snapshot",
+  "schema_version": 1,
+  "case": {
+    "kind": "case",
+    "schema_version": 1,
+    "case_id": "fixture-gap",
+    "scope": "single_chain",
+    "chain": {"id": "gap", "terms": [{"logical_id": "slot", "coefficient": "1"}]},
+    "requirement": {"id": "gap-minimum", "minimum": {"value": "9.95", "unit": "mm"}},
+    "model": {
+      "kind": "linear_free_expansion",
+      "reference": {"value": "20", "unit": "degC"},
+      "operating_min": {"value": "20", "unit": "degC"},
+      "operating_max": {"value": "293.15", "unit": "K"}
+    },
+    "dimensions": [{
+      "logical_id": "slot",
+      "physical_id": "fixture-1-slot",
+      "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+      "alpha": {"value": "0", "unit": "1/K"},
+      "nominal": {"kind": "cad", "target": {"adapter": "solidworks", "occurrence_path": ["Fixture-1"], "configuration": "Default", "dimension_id": "Width@SlotSketch"}},
+      "tolerance": {
+        "kind": "manual",
+        "deviations": {"lower": {"value": "-0.1", "unit": "mm"}, "upper": {"value": "0.1", "unit": "mm"}},
+        "source_ref": "synthetic drawing A"
+      }
+    }],
+    "option_groups": [{
+      "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+      "options": [
+        {"id": "baseline", "deviations": {"lower": {"value": "-0.1", "unit": "mm"}, "upper": {"value": "0.1", "unit": "mm"}}, "score": {"value": "0"}},
+        {"id": "tight", "deviations": {"lower": {"value": "-0.05", "unit": "mm"}, "upper": {"value": "0.05", "unit": "mm"}}, "score": {"value": "1"}}
+      ]
+    }],
+    "objective": {"basis": "synthetic_penalty", "unit": "point", "source_ref": "fixture author", "context": "Illustrative penalty per selected callout"}
+  },
+  "problem": {
+    "scope": "single_chain",
+    "chain": {"id": "gap", "terms": [{"logical_id": "slot", "coefficient": "1"}]},
+    "requirement": {"id": "gap-minimum", "minimum": "9.95"},
+    "model": {"kind": "linear_free_expansion", "reference": "20", "operating_min": "20", "operating_max": "20"},
+    "dimensions": [{
+      "logical_id": "slot",
+      "physical_id": "fixture-1-slot",
+      "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+      "nominal": "10",
+      "alpha": "0",
+      "drawing_limits": {"deviations": {"lower": "-0.1", "upper": "0.1"}, "lower": "9.9", "upper": "10.1"},
+      "tolerance_source": "manual"
+    }],
+    "option_groups": [{
+      "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+      "options": [
+        {"id": "baseline", "deviations": {"lower": "-0.1", "upper": "0.1"}, "score": {"value": "0"}},
+        {"id": "tight", "deviations": {"lower": "-0.05", "upper": "0.05"}, "score": {"value": "1"}}
+      ]
+    }],
+    "objective": {"basis": "synthetic_penalty", "unit": "point", "source_ref": "fixture author", "context": "Illustrative penalty per selected callout"}
+  },
+  "extraction_records": [{
+    "kind": "cad_extraction",
+    "schema_version": 1,
+    "logical_id": "slot",
+    "status": "resolved",
+    "source": {
+      "adapter": "solidworks",
+      "application": "SOLIDWORKS",
+      "application_version": "synthetic-fixture",
+      "assembly": {"id": "synthetic-assembly", "state": "saved"},
+      "assembly_configuration": "Default",
+      "occurrence_path": ["Fixture-1"],
+      "document": {"id": "synthetic-part", "state": "saved"},
+      "configuration": "Default",
+      "dimension_id": "Width@SlotSketch"
+    },
+    "nominal": {"value": "0.01", "unit": "m"},
+    "tolerance": {"status": "supported", "deviations": {"lower": {"value": "-0.00012", "unit": "m"}, "upper": {"value": "0.00012", "unit": "m"}}},
+    "diagnostics": []
+  }],
+  "diagnostics": [{
+    "code": "cad.tolerance_discrepancy",
+    "severity": "warning",
+    "message": "The manual slot tolerance differs from the extracted model tolerance.",
+    "recovery": "Confirm that drawing A supplies the intended tolerance.",
+    "field": "/dimensions/0/tolerance",
+    "logical_id": "slot",
+    "source_ref": "synthetic drawing A"
+  }]
+}

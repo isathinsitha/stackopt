@@ -1,0 +1,34 @@
+[
+  {
+    "id": "missing-requirement-limits", "command": "analyze",
+    "replace": {"path": "/requirement", "value": {"id": "running-clearance"}},
+    "expected": {"exit_status": 3, "code": "input.requirement_missing_limits", "severity": "error", "field": "/requirement"}
+  },
+  {
+    "id": "mixed-unit-reversed-requirement", "command": "analyze",
+    "replace": {"path": "/requirement", "value": {
+      "id": "running-clearance", "minimum": {"value": "1", "unit": "in"}, "maximum": {"value": "20", "unit": "mm"}
+    }},
+    "expected": {"exit_status": 3, "code": "input.reversed_interval", "severity": "error", "field": "/requirement/maximum"}
+  },
+  {
+    "id": "non-text-decimal", "command": "analyze",
+    "replace": {"path": "/requirement/minimum/value", "value": 0.05},
+    "expected": {"exit_status": 3, "code": "input.invalid_decimal", "severity": "error", "field": "/requirement/minimum/value"}
+  },
+  {
+    "id": "boolean-version", "command": "analyze",
+    "replace": {"path": "/schema_version", "value": true},
+    "expected": {"exit_status": 3, "code": "input.schema_version", "severity": "error", "field": "/schema_version"}
+  },
+  {
+    "id": "selected-cad-tolerance-unresolved", "command": "extract",
+    "record_index": 1, "tolerance_evidence": {"status": "unsupported"},
+    "adapter_warning": {
+      "code": "cad.tolerance_unresolved", "severity": "warning", "logical_id": "shaft",
+      "message": "Synthetic unsupported tolerance evidence.",
+      "recovery": "Supply an explicit drawing tolerance or use a qualified annotation."
+    },
+    "expected": {"exit_status": 5, "code": "cad.tolerance_unresolved", "severity": "error", "field": "/dimensions/1/tolerance", "logical_id": "shaft"}
+  }
+]

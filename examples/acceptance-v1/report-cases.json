@@ -1,0 +1,156 @@
+[
+  {
+    "id": "two-sided",
+    "limits_mm": {"minimum": "0.05", "maximum": "0.15"},
+    "expected": {
+      "exit_status": 0, "search": {"status": "complete", "total": 4, "evaluated": 4, "feasible": 3},
+      "feasible_indices": [1, 2, 3], "ranking": {"status": "complete", "best_candidate_indices": [2]},
+      "baseline_margins_mm": {"minimum": "-0.008857", "maximum": "-0.008927"},
+      "comparison": {"candidate_index": 2, "role": "selected",
+        "candidate_margins_mm": {"minimum": "0.0011338", "maximum": "0.0010822"},
+        "margin_delta_mm": {"minimum": "0.0099908", "maximum": "0.0100092"}}
+    }
+  },
+  {
+    "id": "minimum-only",
+    "limits_mm": {"minimum": "0.055"},
+    "expected": {
+      "exit_status": 0, "search": {"status": "complete", "total": 4, "evaluated": 4, "feasible": 2},
+      "feasible_indices": [1, 3], "ranking": {"status": "complete", "best_candidate_indices": [1]},
+      "baseline_margins_mm": {"minimum": "-0.013857"},
+      "comparison": {"candidate_index": 1, "role": "selected",
+        "candidate_margins_mm": {"minimum": "0.0011358"}, "margin_delta_mm": {"minimum": "0.0149928"}}
+    }
+  },
+  {
+    "id": "maximum-only",
+    "limits_mm": {"maximum": "0.15"},
+    "expected": {
+      "exit_status": 0, "search": {"status": "complete", "total": 4, "evaluated": 4, "feasible": 3},
+      "feasible_indices": [1, 2, 3], "ranking": {"status": "complete", "best_candidate_indices": [2]},
+      "baseline_margins_mm": {"maximum": "-0.008927"},
+      "comparison": {"candidate_index": 2, "role": "selected",
+        "candidate_margins_mm": {"maximum": "0.0010822"}, "margin_delta_mm": {"maximum": "0.0100092"}}
+    }
+  },
+  {
+    "id": "impossible",
+    "limits_mm": {"minimum": "0.07", "maximum": "0.13"},
+    "expected": {
+      "exit_status": 6, "search": {"status": "infeasible", "total": 4, "evaluated": 4, "feasible": 0},
+      "feasible_indices": [], "ranking": {"status": "complete", "best_candidate_indices": []},
+      "baseline_margins_mm": {"minimum": "-0.028857", "maximum": "-0.028927"},
+      "closest": {"candidate_index": 3, "qualification": "closest_tested", "maximum_violation_mm": "0.0039106"},
+      "comparison": {"candidate_index": 3, "role": "closest_tested",
+        "candidate_margins_mm": {"minimum": "-0.0038734", "maximum": "-0.0039106"},
+        "margin_delta_mm": {"minimum": "0.0249836", "maximum": "0.0250164"}}
+    }
+  },
+  {
+    "id": "interrupted-no-feasible",
+    "limits_mm": {"minimum": "0.05", "maximum": "0.15"},
+    "search_control": {"interrupt_after": 1},
+    "expected": {
+      "exit_status": 7, "search": {"status": "incomplete", "total": 4, "evaluated": 1, "feasible": 0, "stop_reason": "interrupted"},
+      "diagnostic": {"code": "search.incomplete", "severity": "warning"},
+      "feasible_indices": [], "ranking": {"status": "provisional", "best_candidate_indices": []},
+      "baseline_margins_mm": {"minimum": "-0.008857", "maximum": "-0.008927"},
+      "closest": {"candidate_index": 0, "qualification": "closest_so_far", "maximum_violation_mm": "0.008927"},
+      "comparison": {"candidate_index": 0, "role": "closest_so_far",
+        "candidate_margins_mm": {"minimum": "-0.008857", "maximum": "-0.008927"},
+        "margin_delta_mm": {"minimum": "0", "maximum": "0"}}
+    }
+  },
+  {
+    "id": "interrupted-with-feasible",
+    "limits_mm": {"minimum": "0.05", "maximum": "0.15"},
+    "search_control": {"budget": {"max_evaluations": 2}},
+    "expected": {
+      "exit_status": 7, "search": {"status": "incomplete", "total": 4, "evaluated": 2, "feasible": 1,
+        "stop_reason": "evaluation_limit", "budget": {"max_evaluations": 2}},
+      "diagnostic": {"code": "search.incomplete", "severity": "warning"},
+      "feasible_indices": [1], "ranking": {"status": "provisional", "best_candidate_indices": [1]},
+      "baseline_margins_mm": {"minimum": "-0.008857", "maximum": "-0.008927"},
+      "comparison": {"candidate_index": 1, "role": "provisional_best",
+        "candidate_margins_mm": {"minimum": "0.0061358", "maximum": "0.0060802"},
+        "margin_delta_mm": {"minimum": "0.0149928", "maximum": "0.0150072"}}
+    }
+  },
+  {
+    "id": "zero-tested",
+    "limits_mm": {"minimum": "0.05", "maximum": "0.15"},
+    "search_control": {"interrupt_after": 0},
+    "expected": {
+      "exit_status": 7, "search": {"status": "zero_tested", "total": 4, "evaluated": 0, "feasible": 0, "stop_reason": "interrupted"},
+      "diagnostic": {"code": "search.incomplete", "severity": "warning"},
+      "feasible_indices": [], "ranking": {"status": "provisional", "best_candidate_indices": []},
+      "baseline_margins_mm": {"minimum": "-0.008857", "maximum": "-0.008927"}
+    }
+  },
+  {
+    "id": "tied-score",
+    "limits_mm": {"minimum": "0.05", "maximum": "0.15"},
+    "objective_variant": "equal_tight_scores",
+    "expected": {
+      "exit_status": 0, "search": {"status": "complete", "total": 4, "evaluated": 4, "feasible": 3},
+      "feasible_indices": [1, 2, 3], "ranking": {"status": "complete", "best_candidate_indices": [1, 2]},
+      "baseline_margins_mm": {"minimum": "-0.008857", "maximum": "-0.008927"},
+      "comparison": {"candidate_index": 1, "role": "selected",
+        "candidate_margins_mm": {"minimum": "0.0061358", "maximum": "0.0060802"},
+        "margin_delta_mm": {"minimum": "0.0149928", "maximum": "0.0150072"}}
+    }
+  },
+  {
+    "id": "no-objective",
+    "limits_mm": {"minimum": "0.05", "maximum": "0.15"},
+    "objective_variant": "omit_objective_and_scores",
+    "expected": {
+      "exit_status": 0, "search": {"status": "complete", "total": 4, "evaluated": 4, "feasible": 3},
+      "feasible_indices": [1, 2, 3], "ranking": {"status": "unranked", "reason": "no_objective", "best_candidate_indices": []},
+      "baseline_margins_mm": {"minimum": "-0.008857", "maximum": "-0.008927"}
+    }
+  },
+  {
+    "id": "missing-score",
+    "limits_mm": {"minimum": "0.05", "maximum": "0.14"},
+    "objective_variant": "omit_bore_baseline_score",
+    "expected": {
+      "exit_status": 0, "search": {"status": "complete", "total": 4, "evaluated": 4, "feasible": 1},
+      "feasible_indices": [3], "ranking": {"status": "unranked", "reason": "missing_scores", "best_candidate_indices": []},
+      "baseline_margins_mm": {"minimum": "-0.008857", "maximum": "-0.018927"}
+    }
+  },
+  {
+    "id": "governing-temperature-shift",
+    "limits_mm": {"minimum": "0.05", "maximum": "0.15"},
+    "geometry_variant": "governing_temperature_shift",
+    "expected": {
+      "exit_status": 0, "search": {"status": "complete", "total": 4, "evaluated": 4, "feasible": 2},
+      "feasible_indices": [2, 3], "ranking": {"status": "complete", "best_candidate_indices": [2]},
+      "baseline_margins_mm": {"minimum": "-0.075023", "maximum": "-0.075207"},
+      "comparison": {"candidate_index": 2, "role": "selected",
+        "candidate_margins_mm": {"minimum": "0.0099448", "maximum": "0.0098712"},
+        "margin_delta_mm": {"minimum": "0.0849678", "maximum": "0.0850782"},
+        "attribution": {
+          "minimum": {"baseline_temperature": "60", "candidate_temperature": "-20",
+            "same_temperature_delta": "0.0850782", "governing_temperature_delta": "-0.0001104"},
+          "maximum": {"baseline_temperature": "60", "candidate_temperature": "60",
+            "same_temperature_delta": "0.0850782", "governing_temperature_delta": "0"}
+        }}
+    }
+  },
+  {
+    "id": "closest-minimax-tie",
+    "limits_mm": {"minimum": "0.08", "maximum": "0.12"},
+    "geometry_variant": "minimax_tie",
+    "expected": {
+      "exit_status": 6, "search": {"status": "infeasible", "total": 3, "evaluated": 3, "feasible": 0},
+      "feasible_indices": [], "ranking": {"status": "complete", "best_candidate_indices": []},
+      "baseline_margins_mm": {"minimum": "-0.03", "maximum": "-0.03"},
+      "closest": {"candidate_index": 1, "qualification": "closest_tested", "maximum_violation_mm": "0.015"},
+      "comparison": {"candidate_index": 1, "role": "closest_tested",
+        "candidate_margins_mm": {"minimum": "-0.015", "maximum": "-0.015"},
+        "margin_delta_mm": {"minimum": "0.015", "maximum": "0.015"}}
+    }
+  }
+]

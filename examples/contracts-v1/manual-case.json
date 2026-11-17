@@ -1,0 +1,34 @@
+{
+  "kind": "case",
+  "schema_version": 1,
+  "case_id": "fixture-gap",
+  "scope": "single_chain",
+  "chain": {"id": "gap", "terms": [{"logical_id": "slot", "coefficient": "1"}]},
+  "requirement": {"id": "gap-minimum", "minimum": {"value": "9.95", "unit": "mm"}},
+  "model": {
+    "kind": "linear_free_expansion",
+    "reference": {"value": "20", "unit": "degC"},
+    "operating_min": {"value": "20", "unit": "degC"},
+    "operating_max": {"value": "293.15", "unit": "K"}
+  },
+  "dimensions": [{
+    "logical_id": "slot",
+    "physical_id": "fixture-1-slot",
+    "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+    "alpha": {"value": "0", "unit": "1/K"},
+    "nominal": {"kind": "manual", "length": {"value": "10", "unit": "mm"}, "source_ref": "synthetic nominal"},
+    "tolerance": {
+      "kind": "manual",
+      "deviations": {"lower": {"value": "-0.1", "unit": "mm"}, "upper": {"value": "0.1", "unit": "mm"}},
+      "source_ref": "synthetic drawing A"
+    }
+  }],
+  "option_groups": [{
+    "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+    "options": [
+      {"id": "baseline", "deviations": {"lower": {"value": "-0.1", "unit": "mm"}, "upper": {"value": "0.1", "unit": "mm"}}, "score": {"value": "0"}},
+      {"id": "tight", "deviations": {"lower": {"value": "-0.05", "unit": "mm"}, "upper": {"value": "0.05", "unit": "mm"}}, "score": {"value": "1"}}
+    ]
+  }],
+  "objective": {"basis": "synthetic_penalty", "unit": "point", "source_ref": "fixture author", "context": "Illustrative penalty per selected callout"}
+}

@@ -1,0 +1,108 @@
+# StackOpt contracts v1
+
+[stackopt.contracts](src/stackopt/contracts.py) defines the JSON and in-process record shapes. [stackopt.contract_validation](src/stackopt/contract_validation.py) provides header, decimal and requirement checks. [stackopt.diagnostics](src/stackopt/diagnostics.py) defines diagnostic codes and exit statuses. The Python types describe the data. Runtime validation of complete records lives in [case.py](src/stackopt/case.py) and [snapshot.py](src/stackopt/snapshot.py).
+
+## Documents and numbers
+
+- `kind` and integer `schema_version: 1` are required on `case`, `cad_extraction`, `snapshot`, `analysis_result`, `allocation_result` and `diagnostic_result`. Reject unknown kinds and versions before interpreting fields. A reader must implement a future version explicitly. The package version is independent of the schema version.
+- Use UTF-8 JSON objects. Reject duplicate object keys, unknown fields, wrong types and explicit `null`. Optional fields are omitted. IDs and references are nonblank strings, compared exactly. JSON object key order has no meaning. Array order is significant where specified below.
+- Every persisted physical quantity, chain coefficient and objective score is a finite fixed-point decimal string matching `-?[0-9]+(?:\.[0-9]+)?`. For example, use `"0.000023"` for an expansion coefficient. Versions, candidate indices, counts and numeric native CAD status codes use JSON integers. Booleans are distinct from integers.
+- Author and adapter quantities carry `value` and `unit`. Length units are `mm`, `m` and `in`, with exact multipliers to mm of 1, 1000 and 25.4. Temperature units are `degC` and `K`, with `degC = K − 273.15` for absolute temperatures. `1/K` is the expansion coefficient unit. Signed deviations are lengths and use the same conversions as nominals. A scale factor or chain coefficient is dimensionless.
+- `ResolvedProblem[Fraction]`, `Evaluation[Fraction]` and the other numeric Python records represent values exactly. Snapshot problems and result documents store the corresponding normalized values as bare `DecimalText`, in mm, °C, `1/K`, or the declared objective unit. Budget `max_seconds` is in seconds. Parse using `parse_decimal_text`. Perform conversions, products, sums and comparisons as rational operations. `format_decimal_text` writes an exact fixed-point result without unnecessary zeros and rejects a result with a nonterminating decimal expansion. Round only when rendering for people.
+- Use `cad_double_to_decimal_text` to expand the double's shortest round-trip decimal to fixed point. This preserves the observed value in its original unit for replay and keeps the input precision separate from calculation precision.
+
+## Case and identity
+
+`CaseDocument` contains `case_id`, `scope: "single_chain"`, one named `chain`, one `requirement`, the temperature `model` and `dimensions`. `option_groups` and `objective` are optional. See the [manual case](examples/contracts-v1/manual-case.json).
+
+| Identity | Rule |
+| --- | --- |
+| `logical_id` | Unique in the case's dimension list. A chain term or adapter outcome refers to this ID. A chain has at least one term and may refer to the same logical ID more than once. |
+| `physical_id` | Identifies one independently varying manufactured dimension. Multiple logical aliases may point to it if normalized nominal, expansion coefficient, baseline limits and callout agree. When CAD evidence exists for aliases, it must identify the same observed dimension. Sum the signed coefficients for this identity before evaluation. |
+| Observed CAD dimension | Within one extraction, identify it by adapter, assembly document ID and configuration, occurrence path, referenced document ID and configuration, and native dimension ID. Multiple observations of the same dimension must map to one `physical_id`. Separate occurrences may have different `physical_id` values even if they share a part file. |
+| `callout` | `callout_key` yields `(document_id, dimension_id, revision or None, configuration or None)`. This is the engineer's drawing or model callout identity. Qualify it wherever the applicable revision or configuration distinguishes dimensions or allowable choices. An omitted qualifier has no wildcard semantics. Shared callouts must agree on baseline deviations and use one allocation choice across their physical dimensions. |
+
+`requirement` has an `id` and `minimum`, `maximum`, or both. Compare lengths after exact normalization. An absent pair or reversed limits is invalid. Equality is valid. `parse_requirement` takes a length parser so the same check works on authored quantities and normalized snapshot values. Clearance itself can be negative.
+
+`model.kind` is `linear_free_expansion`. Supply explicit `reference`, `operating_min` and `operating_max`, plus `alpha` per dimension. The temperatures represent a common uniform part temperature. The model assumes free expansion, constant coefficients and a positive `1 + alpha × (T − reference)` over the operating interval. Temperatures must be at or above absolute zero. A single operating temperature is allowed. A reference temperature outside the operating interval is allowed. Nominals and absolute drawing limits must be nonnegative. Each signed lower deviation must be at or below its upper deviation. Both offsets can have the same sign. For each active interval, `DrawingLimits.lower` and `upper` equal the nominal plus the corresponding deviations at the reference temperature.
+
+## Extraction and replay
+
+Adapters implement the [`CadAdapter` protocol](src/stackopt/adapters/contract.py). Each validated binding carries a `logical_id` and `target` with the explicit adapter, occurrence path as an array of path components, referenced configuration and native dimension ID. `extract` takes a case with at least one CAD nominal, targeting one adapter per invocation. Offline `analyze` and `allocate` take a fully manual case or a snapshot.
+
+- The v1 adapter selector recognizes `freecad` as well as `solidworks`. The SOLIDWORKS path uses `--active`. The FreeCAD exporter validates the case inside FreeCAD, observes the selected active FCStd and writes a UTF-8 JSON array of existing `cad_extraction` v1 records. `extract freecad --records RECORDS --case CASE --out SNAPSHOT` consumes the array offline. Field shapes and `schema_version: 1` are unchanged. Readers that predate this extension reject FreeCAD inputs because of the adapter selector.
+- For `freecad`, `occurrence_path` has one segment containing the internal object `Name`, and `dimension_id` is the exact native length property name. Both configuration fields use the StackOpt marker `unconfigured`. `assembly` and `document` describe the same native file in each resolved record and across the batch. The exporter supplies millimetre decimal text from `App::PropertyLength` on valid `Part::Cylinder` objects. Its observed save state is `unknown` for file-backed reads. FreeCAD requires explicit manual deviations and emits `tolerance.status: "unavailable"` with a warning. The resolver rejects supported native deviations for FreeCAD. See the [qualified path](docs/usage.md#freecad).
+
+- Return exactly one versioned record per binding, correlated by logical ID. `status: "resolved"` supplies the nominal, its original unit, the observed `source` and `tolerance` evidence. `status: "failed"` supplies an error diagnostic and includes the observed `source` if fully known. Missing, extra or duplicate records are adapter protocol errors. Resolve a binding against the occurrence's referenced configuration and verify that the returned target matches the request.
+- `source` names the application and version, assembly and part documents, assembly configuration, occurrence path, referenced configuration and native dimension ID. For either document, `saved` means the adapter recognized a persisted document and observed a clear save flag. `modified` means the saved document has pending changes, `unsaved` means it has never been saved, and `unknown` means the state could not be established. Rebuild state is independent of the save flag. Use IDs meaningful within the extraction even when a path is unavailable. Replay preserves the observed state. The resolver emits `cad.source_state` if a source is modified, unsaved or unknown.
+- Tolerance evidence has `status: "supported"` with signed deviations in their source length unit, or `missing`, `unsupported`, `drawing_only` or `unavailable` with a warning. Preserve native type and status observations that apply to the bound dimension in its referenced configuration. `native_status` maps native read names to their status codes or tokens. Separate lower and upper reads can have distinct statuses. The SOLIDWORKS configuration evidence below defines the qualified cases for `supported`.
+- `DimensionSpec.nominal` is the only nominal source. A manual nominal requires a manual tolerance. A CAD nominal requires a successful record even when the tolerance is manual. `DimensionSpec.tolerance` explicitly selects `manual` with deviations and a `source_ref`, or `cad`, which requires supported deviations. There is no fallback. With manual selected, compare any supported CAD interval after exact normalization and emit `cad.tolerance_discrepancy` if it differs. Keep both observations. An unresolved CAD tolerance blocks extraction only when the case selects it.
+- If the adapter cannot carry out an extraction at all, raise `ContractError` with `ExitStatus.CAD_UNAVAILABLE` or `ExitStatus.EXTRACTION_FAILED` as applicable. If one or more bindings fail during a run, preserve per-binding diagnostics and fail snapshot creation. Export a snapshot only after full validation and atomic replacement.
+
+`SnapshotDocument` includes the original `case` with authored values and units, the normalized `problem`, successful `extraction_records`, and `diagnostics`. Manual resolution creates the same problem shape with an empty extraction array. Replay validates the saved normalized model, identity links and evidence structure directly. It uses `problem` for calculation and performs no CAD lookup or file access through provenance references. Snapshot `tolerance_source` is `manual` or `cad`. `option` is used only in an in-memory candidate problem and its resulting evaluation. See the [CAD-shaped snapshot with its embedded case and extraction record](examples/contracts-v1/cad-shaped-snapshot.json).
+
+### SOLIDWORKS configuration evidence
+
+On the two-part SOLIDWORKS fixture in SOLIDWORKS 2026 SP2.1, the bore occurrence referenced `Alternate` while the part's active configuration was `Default`. The explicit nominal read returned `0.0209 m` for `Alternate`. Both tolerance getters returned success with offsets from `Default`. In v1 the binding stays `resolved`, the nominal is retained and `tolerance.status` is `unavailable` with `cad.tolerance_unresolved`. The capture keeps the wrong-configuration reads in the enclosing `raw` evidence. With active and referenced configurations aligned, the spike observed valid signed deviations for Bilateral and Limit, and one valid magnitude for Symmetric with native statuses `1/0`. The [live fixture generator](spikes/solidworks_07/run_fixture.py) exercises the configuration and tolerance cases.
+
+## Analysis and explanations
+
+- `AnalysisResult` pairs the baseline `Evaluation` with `case_id`, `source_kind`, `scope`, `chain_id`, normalized `requirement` and `model`, and warnings. `AllocationResult` has the same context. `source_kind` describes the invocation input. For equivalent manual and snapshot inputs, compare the engineering values independently of source metadata.
+- Each evaluation includes the absolute drawing limits, deviations and tolerance source for each unique physical dimension used by the chain. Always return `lower_bound` and `upper_bound` with the governing temperature and a signed trace. Omit zero coefficients after coalescing. A trace term identifies the physical dimension and callout, coefficient, selected lower or upper drawing limit, thermally expanded length and signed contribution. The contributions sum exactly to the bound. Materialize physical dimensions and terms in first chain occurrence order. Use the lower operating endpoint for an exact governing-temperature tie.
+- `margins.minimum = lower_bound.value − requirement.minimum` and `margins.maximum = requirement.maximum − upper_bound.value`. Include a key only for a declared side. Its temperature is the corresponding bound's temperature. `meets_requirement` is true when all declared margins are nonnegative. `limiting_side` is the declared side with the smallest signed margin, with `minimum` first on a tie.
+- A reported comparison includes the chosen candidate index and role, changed callouts with their before and after deviation intervals, and margin changes for declared sides. Get the corresponding absolute drawing limits from the baseline and candidate evaluations. For each side, compare signed terms at that side's **baseline** governing temperature. `same_temperature_delta` is the sum of candidate-minus-baseline contributions, with the sign reversed for `maximum`. `governing_temperature_delta` is the additional change in candidate margin between the baseline and candidate governing temperatures. Their sum equals `margin_delta`, the candidate margin minus the baseline margin. Record both governing temperatures even when they coincide. Diagnostic comparisons keep their closest-candidate role throughout.
+
+## Allocation
+
+- `option_groups` lists adjustable callouts in declared order. Each group identifies one callout in the chain and supplies at least one permitted interval with an ID unique within the group. An ungrouped callout stays at baseline. A grouped callout can stay at baseline if that interval is explicitly listed. Duplicate group keys are invalid. Apply a group's choice to every occurrence of the callout. Evaluate the baseline independently of the search.
+- Enumerate in declared group and option order, with the rightmost group varying fastest. `Candidate.index` is the zero-based index in that Cartesian product. A candidate assignment contains one selected option per group. With no groups, the product contains one empty assignment that evaluates at baseline. Budget and stop reason describe why a prefix of the ordered product was evaluated. A wall-clock budget can stop at a different prefix on a later run. Complete candidates count only after evaluation succeeds. An unexpected evaluator failure is an execution failure.
+- An objective minimizes the sum of a common-unit score, once per selected callout. Every score inherits the declared basis and unit. `Objective.source_ref` and `context` document provenance and the comparison basis. An option may identify its specific source. For `quoted_cost`, record the quote basis that makes the scores additive and comparable, including the currency and relevant supplier, quantity and price scope. `synthetic_penalty` is a declared score. Scores without a declared objective are invalid. Missing any declared option score leaves the entire search unranked. An empty option product assignment has no ranking basis. The renderer must identify the reason when ranking is unavailable.
+- Keep `feasible_candidates` in candidate index order, even when ranked. Include the actual score inputs on the candidate assignment when supplied. Include `total_score` and populate `ranking.best_candidate_indices` only with a comparable objective. Preserve all tied best indices in stable order. An exhaustive search with a comparable objective has `ranking.status: "complete"`. A stopped search has `"provisional"` with a comparable objective. Both can have an empty best list when there are no evaluated feasible candidates. For `"unranked"`, leave the list empty and use the first applicable reason from `no_objective`, `no_option_groups` and `missing_scores`, in that order. Preserve `ranking.objective` if declared even when unavailable. A selected or provisional explanation refers to the first tied best candidate for display and leaves the tie visible.
+
+| `search.status` | Counts | Closest candidate | Exit |
+| --- | --- | --- | --- |
+| `complete` | `evaluated == total`, `feasible > 0` | Omit | 0 |
+| `infeasible` | `evaluated == total`, `feasible == 0` | `closest_tested` | 6 |
+| `incomplete` | `0 < evaluated < total` | `closest_so_far` only if `feasible == 0` | 7 |
+| `zero_tested` | `evaluated == feasible == 0`, `total >= 1` | Omit | 7 |
+
+`total` is always at least 1 and `feasible ≤ evaluated ≤ total`. `incomplete` and `zero_tested` require `stop_reason` and a `search.incomplete` warning. If no tested candidate passes and at least one was tested, minimize `maximum_violation = max(0, −margin for each declared side)` over tested candidates and break ties by the lowest candidate index. Its explanation uses the matching closest role. Neither a closest candidate nor a provisional best establishes global optimality. The [allocation result example](examples/contracts-v1/allocation-result.json) also contains a complete baseline evaluation. An analysis document uses the shared context and baseline with `kind: "analysis_result"`, omitting the allocation fields.
+
+The assignment is separate from the chain's evaluation. If Chat 11 confirms a shared adjustable callout across approved requirements, a future version can apply the same qualified assignment once, return an evaluation per chain/requirement, and require every declared side to pass. An additional chain or a joint scope is invalid in v1.
+
+## Diagnostics and process status
+
+`Diagnostic` carries a stable `code`, `severity`, `message` and `recovery`. Add `field` as a JSON Pointer relative to the input or evidence under validation and `logical_id` or `source_ref` when known. For example, an extraction-time case diagnostic can refer to `/dimensions/0/tolerance` and retain that pointer when copied into a snapshot. An error validating the embedded case on replay uses the snapshot path starting with `/case`. Clients branch on code and status. Human-facing text can vary. Fatal commands can use `DiagnosticResult` to frame one or more error diagnostics for JSON output.
+
+| Exit | Command outcome |
+| --- | --- |
+| `0 SUCCESS` | Help, successful snapshot write, any valid analysis including a violated requirement, or an exhaustive allocation with at least one feasible candidate. |
+| `1 EXECUTION_FAILURE` | Internal failure or report/snapshot write failure. Use `internal.failure` or `io.write_failed`. A write failure takes precedence over the computed domain status. |
+| `2 USAGE_ERROR` | Argument parser syntax error before dispatch, consistent with Chat 01. |
+| `3 INVALID_INPUT` | Input read failure, malformed/unsupported document, invalid case or snapshot, or a valid command paired with the wrong document type or source declarations. |
+| `4 CAD_UNAVAILABLE` | The optional adapter dependency, SOLIDWORKS installation, or running session is unavailable. Use `cad.unavailable`. |
+| `5 EXTRACTION_FAILED` | The session exists but the active document, bindings, required measurements, selected CAD tolerance or adapter record protocol failed. |
+| `6 ALLOCATION_INFEASIBLE` | A valid exhaustive result proves that none of the declared choices passes. |
+| `7 ALLOCATION_INCOMPLETE` | A valid stopped search result, including zero tested candidates. |
+
+Chat 10 maps these statuses at the handler boundary. Exit `1` and `2` preserve Chat 01's runtime behavior. For `extract`, `--out` is the snapshot file and stdout carries a summary. For `analyze` and `allocate`, use stdout for the terminal report without `--json`. With `--json`, write the full report to the requested file and leave stdout empty. Write results for exits `0`, `6` and `7` when applicable. On fatal errors, leave stdout and any existing destination untouched. Send diagnostics to stderr, using a versioned `DiagnosticResult` for application failures with `--json` and terminal text otherwise. Keep help and syntax output under `argparse`. Warnings may appear in stderr and should be included in the applicable snapshot or report JSON.
+
+### Validation examples
+
+| Input or observation | Diagnostic and pointer |
+| --- | --- |
+| Case version `true`, `"1"` or `2` | `input.schema_version` at `/schema_version` |
+| `{"id":"gap"}` as the requirement | `input.requirement_missing_limits` at `/requirement` |
+| Minimum 1 in and maximum 20 mm | `input.reversed_interval` at `/requirement/maximum`, after conversion to 25.4 mm and 20 mm |
+| Numeric `0.05`, `null` or `"NaN"` as the minimum value | `input.invalid_decimal` at `/requirement/minimum/value` |
+| `"K"` as the minimum's length unit | `input.unsupported_unit` at `/requirement/minimum/unit` |
+| Two options with the same ID in a group | `input.duplicate_id` at the duplicate option's `/id` field |
+| One `physical_id` with two different normalized nominals | `input.conflicting_identity` at the conflicting dimension's `/physical_id` field |
+| CAD tolerance selected and extraction reports `unsupported` | `cad.tolerance_unresolved` with the logical ID and tolerance selection field, exit 5 |
+| CAD deviations disagree with selected manual offsets | `cad.tolerance_discrepancy` warning with the logical ID. Use the manual offsets. |
+
+An application failure for `analyze --json` produces this form on stderr.
+
+```json
+{"kind":"diagnostic_result","schema_version":1,"command":"analyze","diagnostics":[{"code":"input.requirement_missing_limits","severity":"error","field":"/requirement","message":"No clearance limits were declared.","recovery":"Declare minimum, maximum or both."}]}
+```

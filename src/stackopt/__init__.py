@@ -1,0 +1,1 @@
+"""StackOpt command-line application."""

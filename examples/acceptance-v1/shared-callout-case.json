@@ -1,0 +1,55 @@
+{
+  "kind": "case", "schema_version": 1, "case_id": "fixture-shared-callout", "scope": "single_chain",
+  "chain": {"id": "signed-stack", "terms": [
+    {"logical_id": "a", "coefficient": "2"},
+    {"logical_id": "a-alias", "coefficient": "-1"},
+    {"logical_id": "a-other", "coefficient": "-1"},
+    {"logical_id": "b", "coefficient": "-1"},
+    {"logical_id": "b", "coefficient": "0"},
+    {"logical_id": "c", "coefficient": "0.5"}
+  ]},
+  "requirement": {"id": "synthetic-stack-window",
+    "minimum": {"value": "-3.475", "unit": "mm"}, "maximum": {"value": "-3.075", "unit": "mm"}},
+  "model": {"kind": "linear_free_expansion", "reference": {"value": "20", "unit": "degC"},
+    "operating_min": {"value": "-20", "unit": "degC"}, "operating_max": {"value": "60", "unit": "degC"}},
+  "dimensions": [
+    {
+      "logical_id": "a", "physical_id": "a-1", "callout": {"document_id": "synthetic-A", "dimension_id": "length"},
+      "alpha": {"value": "0", "unit": "1/K"},
+      "nominal": {"kind": "manual", "length": {"value": "10", "unit": "mm"}, "source_ref": "synthetic geometry"},
+      "tolerance": {"kind": "manual", "source_ref": "synthetic drawing",
+        "deviations": {"lower": {"value": "0", "unit": "mm"}, "upper": {"value": "0.2", "unit": "mm"}}}
+    },
+    {
+      "logical_id": "a-alias", "physical_id": "a-1", "callout": {"document_id": "synthetic-A", "dimension_id": "length"},
+      "alpha": {"value": "0", "unit": "1/K"},
+      "nominal": {"kind": "manual", "length": {"value": "10", "unit": "mm"}, "source_ref": "synthetic geometry"},
+      "tolerance": {"kind": "manual", "source_ref": "synthetic drawing",
+        "deviations": {"lower": {"value": "0", "unit": "mm"}, "upper": {"value": "0.2", "unit": "mm"}}}
+    },
+    {
+      "logical_id": "a-other", "physical_id": "a-2", "callout": {"document_id": "synthetic-A", "dimension_id": "length"},
+      "alpha": {"value": "0", "unit": "1/K"},
+      "nominal": {"kind": "manual", "length": {"value": "10", "unit": "mm"}, "source_ref": "synthetic geometry"},
+      "tolerance": {"kind": "manual", "source_ref": "synthetic drawing",
+        "deviations": {"lower": {"value": "0", "unit": "mm"}, "upper": {"value": "0.2", "unit": "mm"}}}
+    },
+    {
+      "logical_id": "b", "physical_id": "b-1", "callout": {"document_id": "synthetic-B", "dimension_id": "length"},
+      "alpha": {"value": "0", "unit": "1/K"},
+      "nominal": {"kind": "manual", "length": {"value": "4", "unit": "mm"}, "source_ref": "synthetic geometry"},
+      "tolerance": {"kind": "manual", "source_ref": "synthetic drawing",
+        "deviations": {"lower": {"value": "-0.3", "unit": "mm"}, "upper": {"value": "-0.1", "unit": "mm"}}}
+    },
+    {
+      "logical_id": "c", "physical_id": "c-1", "callout": {"document_id": "synthetic-C", "dimension_id": "length"},
+      "alpha": {"value": "0", "unit": "1/K"},
+      "nominal": {"kind": "manual", "length": {"value": "1", "unit": "mm"}, "source_ref": "synthetic geometry"},
+      "tolerance": {"kind": "manual", "source_ref": "synthetic drawing",
+        "deviations": {"lower": {"value": "0.05", "unit": "mm"}, "upper": {"value": "0.05", "unit": "mm"}}}
+    }
+  ],
+  "option_groups": [{"callout": {"document_id": "synthetic-A", "dimension_id": "length"}, "options": [
+    {"id": "a-tight", "deviations": {"lower": {"value": "0", "unit": "mm"}, "upper": {"value": "0.1", "unit": "mm"}}}
+  ]}]
+}

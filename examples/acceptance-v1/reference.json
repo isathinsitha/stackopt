@@ -1,0 +1,52 @@
+{
+  "requirement_id": "running-clearance",
+  "temperature_endpoints_degC": ["-20", "60"],
+  "reference_drawing_limits_mm": {
+    "bore-baseline": ["20.075", "20.125"],
+    "bore-tight": ["20.085", "20.115"],
+    "shaft-baseline": ["19.975", "20.025"],
+    "shaft-tight": ["19.99", "20.01"]
+  },
+  "candidates": [
+    {
+      "index": 0, "option_ids": ["bore-baseline", "shaft-baseline"], "score": "0",
+      "cold_bounds_mm": ["0.041143", "0.141073"],
+      "hot_bounds_mm": ["0.058857", "0.158927"],
+      "lower_signed_terms_mm": ["20.056531", "-20.015388"],
+      "upper_signed_terms_mm": ["20.143515", "-19.984588"]
+    },
+    {
+      "index": 1, "option_ids": ["bore-baseline", "shaft-tight"], "score": "3",
+      "cold_bounds_mm": ["0.0561358", "0.1260802"],
+      "hot_bounds_mm": ["0.0738642", "0.1439198"],
+      "lower_signed_terms_mm": ["20.056531", "-20.0003952"],
+      "upper_signed_terms_mm": ["20.143515", "-19.9995952"]
+    },
+    {
+      "index": 2, "option_ids": ["bore-tight", "shaft-baseline"], "score": "1",
+      "cold_bounds_mm": ["0.0511338", "0.1310822"],
+      "hot_bounds_mm": ["0.0688662", "0.1489178"],
+      "lower_signed_terms_mm": ["20.0665218", "-20.015388"],
+      "upper_signed_terms_mm": ["20.1335058", "-19.984588"]
+    },
+    {
+      "index": 3, "option_ids": ["bore-tight", "shaft-tight"], "score": "4",
+      "cold_bounds_mm": ["0.0661266", "0.1160894"],
+      "hot_bounds_mm": ["0.0838734", "0.1339106"],
+      "lower_signed_terms_mm": ["20.0665218", "-20.0003952"],
+      "upper_signed_terms_mm": ["20.1335058", "-19.9995952"]
+    }
+  ],
+  "baseline": {
+    "envelope_mm": ["0.041143", "0.158927"],
+    "margins_mm": {"minimum": "-0.008857", "maximum": "-0.008927"},
+    "limiting_side": "maximum"
+  },
+  "bore_only": {
+    "envelope_mm": ["0.0511338", "0.1489178"],
+    "margins_mm": {"minimum": "0.0011338", "maximum": "0.0010822"},
+    "limiting_side": "maximum",
+    "margin_delta_mm": {"minimum": "0.0099908", "maximum": "0.0100092"},
+    "upper_margin_delta_um": "10.0092"
+  }
+}

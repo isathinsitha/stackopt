@@ -1,0 +1,84 @@
+[
+  {
+    "kind": "cad_extraction",
+    "schema_version": 1,
+    "logical_id": "bore",
+    "status": "resolved",
+    "source": {
+      "adapter": "freecad",
+      "application": "FreeCAD",
+      "application_version": "1.1.4",
+      "assembly": {
+        "id": "fixture:StackOptReference.FCStd",
+        "state": "unknown"
+      },
+      "assembly_configuration": "unconfigured",
+      "occurrence_path": [
+        "BoreTool"
+      ],
+      "document": {
+        "id": "fixture:StackOptReference.FCStd",
+        "state": "unknown"
+      },
+      "configuration": "unconfigured",
+      "dimension_id": "BoreDiameter"
+    },
+    "nominal": {
+      "value": "20.1",
+      "unit": "mm"
+    },
+    "tolerance": {
+      "status": "unavailable"
+    },
+    "diagnostics": [
+      {
+        "code": "cad.tolerance_unresolved",
+        "severity": "warning",
+        "logical_id": "bore",
+        "message": "The FreeCAD exporter reads nominal lengths only.",
+        "recovery": "Declare explicit sourced manual deviations in the case."
+      }
+    ]
+  },
+  {
+    "kind": "cad_extraction",
+    "schema_version": 1,
+    "logical_id": "shaft",
+    "status": "resolved",
+    "source": {
+      "adapter": "freecad",
+      "application": "FreeCAD",
+      "application_version": "1.1.4",
+      "assembly": {
+        "id": "fixture:StackOptReference.FCStd",
+        "state": "unknown"
+      },
+      "assembly_configuration": "unconfigured",
+      "occurrence_path": [
+        "Shaft"
+      ],
+      "document": {
+        "id": "fixture:StackOptReference.FCStd",
+        "state": "unknown"
+      },
+      "configuration": "unconfigured",
+      "dimension_id": "ShaftDiameter"
+    },
+    "nominal": {
+      "value": "20.0",
+      "unit": "mm"
+    },
+    "tolerance": {
+      "status": "unavailable"
+    },
+    "diagnostics": [
+      {
+        "code": "cad.tolerance_unresolved",
+        "severity": "warning",
+        "logical_id": "shaft",
+        "message": "The FreeCAD exporter reads nominal lengths only.",
+        "recovery": "Declare explicit sourced manual deviations in the case."
+      }
+    ]
+  }
+]

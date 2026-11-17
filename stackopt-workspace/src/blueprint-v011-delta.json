@@ -1,0 +1,544 @@
+{
+  "components": {
+    "case": {
+      "description": "Versioned JSON with logical dimension IDs, signed coefficients, source declarations, model conditions, candidate options and optional objective. Each case defines one functional chain.",
+      "inputs": [
+        {
+          "name": "Manual dimension values",
+          "type": "Case JSON v1",
+          "unit": "Declared units",
+          "description": "Logical IDs, nominal lengths, lower and upper offsets and declared origin.",
+          "componentId": "manual",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Engineering constraints",
+          "type": "Case JSON v1",
+          "unit": "Length, °C, K⁻¹",
+          "description": "Signed functional chain, allowable clearance, expansion coefficients, temperature assumptions.",
+          "componentId": "requirements",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Drawing options",
+          "type": "Case JSON v1",
+          "unit": "Declared length units",
+          "description": "Discrete candidate IDs, interval deviations and shared drawing identity.",
+          "componentId": "options",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Ranking policy",
+          "type": "Case JSON v1",
+          "unit": "Declared cost or penalty unit",
+          "description": "Comparable score unit and basis, optional score per option.",
+          "componentId": "objective",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "stage-contracts",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "requirements": {
+      "purpose": "User specifies allowable clearance bounds, temperature interval and expansion coefficients.",
+      "description": "User specifies allowable clearance bounds, temperature interval and expansion coefficients. The reference temperature is explicit. The program has no default clearance, material or operating range."
+    },
+    "options": {
+      "description": "Each option identifies one permitted signed tolerance interval. Unchanged drawing tolerances stay at baseline. A shared drawing identity may control several independently manufactured occurrences.",
+      "outputs": [
+        {
+          "name": "Drawing options",
+          "type": "Case JSON v1",
+          "unit": "Declared length units",
+          "description": "Discrete candidate IDs, interval deviations and shared drawing identity.",
+          "componentId": "case",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "replay": {
+      "outputs": [
+        {
+          "name": "Validated problem",
+          "type": "Resolved Python object",
+          "unit": "mm, °C, K⁻¹",
+          "description": "Canonical signed chain and baseline drawing bounds.",
+          "componentId": "compile",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Permitted choices",
+          "type": "Resolved Python object",
+          "unit": "",
+          "description": "Declared options indexed by drawing identity, fixed dimensions, objective basis.",
+          "componentId": "options-expand",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "compile": {
+      "description": "Combine repeated references to the same physical dimension before propagation. References to distinct manufactured occurrences can vary independently, even when they share a drawing.",
+      "algorithm": {
+        "name": "Compile signed chain",
+        "family": "",
+        "description": "Combine repeated references to the same physical dimension before propagation. References to distinct manufactured occurrences can vary independently, even when they share a drawing.",
+        "method": "Group by physical variable identity and sum signed coefficients. Preserve each distinct drawing identity for option assignment.",
+        "alternatives": "",
+        "complexity": "",
+        "limitations": "",
+        "validation": "A dimension referenced as +1 and −1 contributes exactly zero.",
+        "formula": "",
+        "pseudocode": "",
+        "implementation": ""
+      }
+    },
+    "endpoints": {
+      "outputs": [
+        {
+          "name": "Operating envelope",
+          "type": "Typed envelope",
+          "unit": "mm, °C",
+          "description": "Global lower and upper clearance bounds and corresponding endpoint temperatures.",
+          "componentId": "clearance-gate",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "clearance-gate": {
+      "purpose": "Compare the full-range envelope with the required clearance interval.",
+      "description": "Compare the full-range envelope with the required clearance interval. Return both signed margins and limiting conditions.",
+      "outputs": [
+        {
+          "name": "Baseline bounds and margin",
+          "type": "Analysis result",
+          "unit": "mm, °C",
+          "description": "Feasibility comparison, both signed margins, and limiting endpoints.",
+          "componentId": "result",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Candidate feasibility",
+          "type": "Analysis result",
+          "unit": "mm, °C",
+          "description": "Candidate envelope and both signed margins from the shared evaluator.",
+          "componentId": "candidate-check",
+          "required": true,
+          "defaultValue": ""
+        }
+      ],
+      "algorithm": {
+        "name": "Clearance constraint",
+        "family": "",
+        "description": "Compare the full-range envelope with the required clearance interval. Return both signed margins and limiting conditions.",
+        "method": "",
+        "alternatives": "",
+        "complexity": "",
+        "limitations": "",
+        "validation": "",
+        "formula": "m_lower = g_min − g_required,min; m_upper = g_required,max − g_max",
+        "pseudocode": "",
+        "implementation": "",
+        "edgeCases": "Touching a limit passes with exact arithmetic on canonical inputs. A quantized CAD observation can still carry input uncertainty; exact arithmetic does not remove it."
+      }
+    },
+    "options-expand": {
+      "purpose": "Form the Cartesian product of choices by drawing identity.",
+      "description": "Form the Cartesian product of choices by drawing identity. Apply each choice to every occurrence that shares the drawing.",
+      "inputs": [
+        {
+          "name": "Permitted choices",
+          "type": "Resolved Python object",
+          "unit": "",
+          "description": "Declared options indexed by drawing identity, fixed dimensions, objective basis.",
+          "componentId": "replay",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "stage-allocation",
+          "required": true,
+          "defaultValue": ""
+        }
+      ],
+      "algorithm": {
+        "name": "Candidate combinations",
+        "family": "",
+        "description": "Form the Cartesian product of choices by drawing identity. Apply each choice to every occurrence that shares the drawing.",
+        "method": "Enumerate candidates in a defined order. Track the total and evaluated counts. If a runtime budget halts the search, return incomplete.",
+        "alternatives": "",
+        "complexity": "",
+        "limitations": "",
+        "validation": "",
+        "formula": "",
+        "pseudocode": "",
+        "implementation": ""
+      }
+    },
+    "candidate-check": {
+      "inputs": [
+        {
+          "name": "Candidate drawing limits",
+          "type": "Candidate object",
+          "unit": "mm",
+          "description": "Apply one complete option combination to the resolved snapshot.",
+          "componentId": "options-expand",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Candidate feasibility",
+          "type": "Analysis result",
+          "unit": "mm, °C",
+          "description": "Candidate envelope and both signed margins from the shared evaluator.",
+          "componentId": "clearance-gate",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "stage-allocation",
+          "required": true,
+          "defaultValue": ""
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Evaluate candidate",
+          "type": "Resolved Python object",
+          "unit": "",
+          "description": "Same typed analysis input with the candidate drawing bounds.",
+          "componentId": "compile",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Candidate outcomes",
+          "type": "Candidate stream",
+          "unit": "",
+          "description": "Candidate IDs, feasibility evidence, score and search completion state.",
+          "componentId": "ranking",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "ranking": {
+      "outputs": [
+        {
+          "name": "Allocation result",
+          "type": "Allocation result",
+          "unit": "",
+          "description": "Feasible options, ties, score inputs and checked-versus-total counts.",
+          "componentId": "result",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Search acceptance check",
+          "type": "Test observations",
+          "unit": "",
+          "description": "Expected candidate, completion state, ties and absent-objective cases.",
+          "componentId": "allocation-test",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "result": {
+      "description": "Versioned result distinguishes baseline and candidate drawing limits. Include envelope, controlling temperatures, both margins, objective basis, completion counts, assumptions and diagnostics.",
+      "inputs": [
+        {
+          "name": "Baseline bounds and margin",
+          "type": "Analysis result",
+          "unit": "mm, °C",
+          "description": "Feasibility comparison, both signed margins, and limiting endpoints.",
+          "componentId": "clearance-gate",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Allocation result",
+          "type": "Allocation result",
+          "unit": "",
+          "description": "Feasible options, ties, score inputs and checked-versus-total counts.",
+          "componentId": "ranking",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "stage-contracts",
+          "required": true,
+          "defaultValue": ""
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Render output",
+          "type": "Result JSON v1",
+          "unit": "",
+          "description": "Versioned result object with units and assumption provenance.",
+          "componentId": "terminal",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "cad-test": {
+      "outputs": [
+        {
+          "name": "Integration evidence",
+          "type": "Gate record",
+          "unit": "",
+          "description": "Tested CAD version, supported annotation types and replay evidence.",
+          "componentId": "release-test",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "release-test": {
+      "inputs": [
+        {
+          "name": "Contract evidence",
+          "type": "Gate record",
+          "unit": "",
+          "description": "Validated snapshot replay on a clean environment.",
+          "componentId": "case-test",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Numerical evidence",
+          "type": "Gate record",
+          "unit": "",
+          "description": "Independent interval and temperature results.",
+          "componentId": "numeric-test",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Allocation evidence",
+          "type": "Gate record",
+          "unit": "",
+          "description": "Reference ranking result and failure behavior.",
+          "componentId": "allocation-test",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Integration evidence",
+          "type": "Gate record",
+          "unit": "",
+          "description": "Tested CAD version, supported annotation types and replay evidence.",
+          "componentId": "cad-test",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "CLI evidence",
+          "type": "Test observations",
+          "unit": "",
+          "description": "Machine-readable result, diagnostic form and observed exit status from a clean environment.",
+          "componentId": "terminal",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "stage-release",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "stage-allocation": {
+      "outputs": [
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "options-expand",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "candidate-check",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "ranking",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "terminal",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Segment handoff",
+          "type": "Build handoff",
+          "unit": "",
+          "description": "Accepted implementation and verification evidence.",
+          "componentId": "stage-cad",
+          "required": true,
+          "defaultValue": ""
+        }
+      ],
+      "gate": {
+        "code": "S4",
+        "stage": "Allocation & reporting",
+        "acceptance": "The reference option wins at penalty 1. Boundary, tie, infeasible and incomplete cases pass.",
+        "failure": "Resolve the failed criterion before accepting this segment.",
+        "result": "Not evaluated",
+        "output": "Reviewable implementation and evidence."
+      }
+    },
+    "stage-verify": {
+      "outputs": [
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "case-test",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "numeric-test",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "allocation-test",
+          "required": true,
+          "defaultValue": ""
+        },
+        {
+          "name": "Segment handoff",
+          "type": "Build handoff",
+          "unit": "",
+          "description": "Accepted implementation and verification evidence.",
+          "componentId": "stage-release",
+          "required": true,
+          "defaultValue": ""
+        }
+      ]
+    },
+    "stage-release": {
+      "outputs": [
+        {
+          "name": "Implementation scope",
+          "type": "Work item",
+          "unit": "",
+          "description": "Component delivered or qualified in this segment.",
+          "componentId": "release-test",
+          "required": true,
+          "defaultValue": ""
+        }
+      ],
+      "gate": {
+        "code": "S7",
+        "stage": "Engineering review",
+        "acceptance": "An engineer can trace the selected drawing decision to the requirements, assumptions and candidate options.",
+        "failure": "Resolve the failed criterion before accepting this segment.",
+        "result": "Not evaluated",
+        "output": "Reviewable implementation and evidence."
+      }
+    }
+  },
+  "componentsAdded": [
+    "bound-trace",
+    "closest",
+    "joint-scope",
+    "binding-trial",
+    "change-trace",
+    "explanation-test"
+  ],
+  "connections": {
+    "edge-options-case": {
+      "payload": "Discrete candidate IDs, interval deviations and shared drawing identity."
+    },
+    "edge-clearance-gate-result": {
+      "payload": "Feasibility comparison, both signed margins, and limiting endpoints."
+    },
+    "edge-replay-options-expand": {
+      "payload": "Declared options indexed by drawing identity, fixed dimensions, objective basis."
+    },
+    "edge-clearance-gate-candidate-check": {
+      "payload": "Candidate envelope and both signed margins from the shared evaluator."
+    }
+  },
+  "connectionsAdded": [
+    "edge-endpoints-bound-trace",
+    "edge-bound-trace-change-trace",
+    "edge-candidate-check-closest",
+    "edge-closest-result",
+    "edge-ranking-change-trace",
+    "edge-closest-change-trace",
+    "edge-change-trace-result",
+    "edge-result-explanation-test",
+    "edge-explanation-test-release-test",
+    "edge-cad-test-binding-trial",
+    "edge-joint-scope-candidate-check",
+    "edge-stage-allocation-closest",
+    "edge-stage-allocation-bound-trace",
+    "edge-stage-allocation-change-trace",
+    "edge-stage-verify-explanation-test",
+    "edge-stage-release-joint-scope",
+    "edge-stage-release-binding-trial"
+  ]
+}

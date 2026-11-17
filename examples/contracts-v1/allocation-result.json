@@ -1,0 +1,84 @@
+{
+  "kind": "allocation_result",
+  "schema_version": 1,
+  "source_kind": "case",
+  "case_id": "fixture-gap",
+  "scope": "single_chain",
+  "chain_id": "gap",
+  "requirement": {"id": "gap-minimum", "minimum": "9.95"},
+  "model": {"kind": "linear_free_expansion", "reference": "20", "operating_min": "20", "operating_max": "20"},
+  "baseline": {
+    "drawing_limits": [{
+      "physical_id": "fixture-1-slot",
+      "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+      "tolerance_source": "manual",
+      "limits": {"deviations": {"lower": "-0.1", "upper": "0.1"}, "lower": "9.9", "upper": "10.1"}
+    }],
+    "lower_bound": {"value": "9.9", "temperature": "20", "terms": [{
+      "physical_id": "fixture-1-slot",
+      "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+      "coefficient": "1", "drawing_limit": "lower", "expanded_length": "9.9", "contribution": "9.9"
+    }]},
+    "upper_bound": {"value": "10.1", "temperature": "20", "terms": [{
+      "physical_id": "fixture-1-slot",
+      "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+      "coefficient": "1", "drawing_limit": "upper", "expanded_length": "10.1", "contribution": "10.1"
+    }]},
+    "margins": {"minimum": "-0.05"},
+    "meets_requirement": false,
+    "limiting_side": "minimum"
+  },
+  "diagnostics": [],
+  "search": {"status": "complete", "total": 2, "evaluated": 2, "feasible": 1},
+  "feasible_candidates": [{
+    "index": 1,
+    "assignment": [{
+      "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+      "option_id": "tight",
+      "score": {"value": "1"}
+    }],
+    "total_score": "1",
+    "evaluation": {
+      "drawing_limits": [{
+        "physical_id": "fixture-1-slot",
+        "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+        "tolerance_source": "option",
+        "limits": {"deviations": {"lower": "-0.05", "upper": "0.05"}, "lower": "9.95", "upper": "10.05"}
+      }],
+      "lower_bound": {"value": "9.95", "temperature": "20", "terms": [{
+        "physical_id": "fixture-1-slot",
+        "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+        "coefficient": "1", "drawing_limit": "lower", "expanded_length": "9.95", "contribution": "9.95"
+      }]},
+      "upper_bound": {"value": "10.05", "temperature": "20", "terms": [{
+        "physical_id": "fixture-1-slot",
+        "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+        "coefficient": "1", "drawing_limit": "upper", "expanded_length": "10.05", "contribution": "10.05"
+      }]},
+      "margins": {"minimum": "0"},
+      "meets_requirement": true,
+      "limiting_side": "minimum"
+    }
+  }],
+  "ranking": {
+    "status": "complete",
+    "objective": {"basis": "synthetic_penalty", "unit": "point", "source_ref": "fixture author", "context": "Illustrative penalty per selected callout"},
+    "best_candidate_indices": [1]
+  },
+  "explanation": {
+    "candidate_index": 1,
+    "role": "selected",
+    "callout_changes": [{
+      "callout": {"document_id": "fixture-drawing", "dimension_id": "slot-width", "revision": "A"},
+      "option_id": "tight",
+      "before": {"lower": "-0.1", "upper": "0.1"},
+      "after": {"lower": "-0.05", "upper": "0.05"}
+    }],
+    "margins": {"minimum": {
+      "baseline_margin": "-0.05", "candidate_margin": "0", "margin_delta": "0.05",
+      "baseline_temperature": "20", "candidate_temperature": "20",
+      "same_temperature_delta": "0.05", "governing_temperature_delta": "0",
+      "terms": [{"physical_id": "fixture-1-slot", "baseline_contribution": "9.9", "candidate_contribution": "9.95"}]
+    }}
+  }
+}

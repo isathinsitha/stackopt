@@ -2,7 +2,7 @@
 
 StackOpt is a Python CLI for worst-case dimensional tolerance analysis. Give it a signed dimension chain, a clearance requirement, and permitted drawing tolerances. It computes the clearance envelope over a temperature range and checks which tolerance combinations satisfy the requirement. Reports identify the dimensions and temperatures that control each bound.
 
-**Status** · Development build (`0.1.0.dev0`). The numerical model, CAD extraction paths, and offline replay have been checked against synthetic fixtures. A representative engineering assembly review is pending.
+**Status** · Development build (`0.1.0.dev0`). The numerical model, CAD extraction paths, and offline replay have been checked against synthetic fixtures. The [real-assembly validation record](docs/real-assembly-validation.md) documents the open engineering review and links to the case intake form.
 
 ## Quick start
 

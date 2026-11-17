@@ -86,7 +86,7 @@ flowchart TD
     more -->|"No"| full["Report feasible assignments or infeasibility within the options"]
 ```
 
-Each option applies to every occurrence of its qualified callout. The CLI supports stopping between candidates with `Ctrl+C`. The allocator also accepts evaluation and time budgets through its Python entry point.
+Each option applies to every occurrence of its qualified callout. The CLI supports stopping between candidates with `Ctrl+C`, `--max-evaluations` and `--max-seconds`. The same budgets are available through the allocator's Python entry point.
 
 ## CAD support roadmap
 

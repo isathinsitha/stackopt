@@ -1,10 +1,10 @@
 """StackOpt v1 data shapes. See STACKOPT_CONTRACTS_V1.md for invariants."""
 
-from typing import Generic, Literal, NotRequired, TypedDict, TypeVar
+from typing import Final, Generic, Literal, NotRequired, TypedDict, TypeVar
 
 from .diagnostics import Diagnostic
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION: Final = 1
 FREECAD_UNCONFIGURED = "unconfigured"
 DecimalText = str
 ValueT = TypeVar("ValueT")

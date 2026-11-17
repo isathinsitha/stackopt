@@ -17,3 +17,13 @@ stackopt = "stackopt.cli:main"
 where = ["src"]
 include = ["stackopt", "stackopt.*"]
 namespaces = false
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src"]
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+# CAD runtimes are only importable inside SOLIDWORKS' pywin32 or FreeCAD environments.
+module = ["FreeCAD", "pythoncom", "win32com", "win32com.*"]
+ignore_missing_imports = true

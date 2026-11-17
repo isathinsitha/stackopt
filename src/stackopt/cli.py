@@ -93,6 +93,7 @@ class _ProductionHandlers:
         document = load_case(case)
         bindings = cad_bindings(document, adapter=adapter)
 
+        observations: Sequence[object]
         if records is None:
             from .adapters.solidworks import extract_active
 

@@ -1,7 +1,9 @@
 import json
 from copy import deepcopy
 from fractions import Fraction
+import os
 from pathlib import Path
+import stat
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -240,6 +242,21 @@ class SnapshotTests(unittest.TestCase):
                 validate_snapshot(snapshot)
             self.assertEqual(error.exception.exit_status, ExitStatus.INVALID_INPUT)
             self.assertEqual(error.exception.diagnostic["field"], field)
+
+    @unittest.skipIf(os.name == "nt", "POSIX permission bits")
+    def test_atomic_write_uses_umask_or_keeps_existing_mode(self):
+        resolved = resolve_case(load("manual-case.json"))
+        previous = os.umask(0o022)
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                path = Path(directory) / "snapshot.json"
+                write_snapshot(path, resolved)
+                self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o644)
+                path.chmod(0o640)
+                write_snapshot(path, resolved)
+                self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o640)
+        finally:
+            os.umask(previous)
 
     def test_atomic_failures_leave_original_and_remove_temp_files(self):
         resolved = resolve_case(load("manual-case.json"))

@@ -88,6 +88,16 @@ def _invalid(code: DiagnosticCode, message: str, recovery: str, path: str) -> No
     )
 
 
+def _internal(message: str) -> NoReturn:
+    """Report a broken invariant. Unlike assert, this survives python -O."""
+    raise ContractError({
+        "code": "internal.failure",
+        "severity": "error",
+        "message": message,
+        "recovery": "Report the error with the command and input.",
+    }, ExitStatus.EXECUTION_FAILURE)
+
+
 def _pointer(path: str, key: object) -> str:
     token = str(key).replace("~", "~0").replace("/", "~1")
     return f"{path}/{token}"
@@ -656,7 +666,8 @@ def _read_observations(
         spec_index, item = bound[identifier]
         spec = item.spec
         nominal_spec = spec["nominal"]
-        assert nominal_spec["kind"] == "cad"
+        if nominal_spec["kind"] != "cad":
+            _internal("A bound record refers to a manual nominal.")
         for key, requested in nominal_spec["target"].items():
             if cast(dict[str, object], source)[key] != requested:
                 _identity_error(f"{pointer}/source/{key}", "The observation does not match the requested target.")
@@ -751,7 +762,8 @@ def resolve_case(
                 deviations = observation.deviations
             elif observation.deviations is not None and deviations != observation.deviations:
                 tolerance = spec["tolerance"]
-                assert tolerance["kind"] == "manual"
+                if tolerance["kind"] != "manual":
+                    _internal("CAD deviations were compared with a non-manual tolerance.")
                 diagnostics.append({
                     "code": "cad.tolerance_discrepancy", "severity": "warning",
                     "message": "The selected manual deviations differ from the extracted CAD deviations.",
@@ -759,7 +771,8 @@ def resolve_case(
                     "field": f"/dimensions/{index}/tolerance", "logical_id": identifier,
                     "source_ref": tolerance["source_ref"],
                 })
-        assert nominal is not None and deviations is not None
+        if nominal is None or deviations is None:
+            _internal(f"Dimension {identifier!r} was not fully resolved.")
         dimensions.append({
             "logical_id": identifier, "physical_id": spec["physical_id"],
             "callout": spec["callout"], "alpha": item.alpha, "nominal": nominal,

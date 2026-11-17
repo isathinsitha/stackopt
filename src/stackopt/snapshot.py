@@ -22,6 +22,7 @@ from .case import (
     _drawing_limits,
     _duplicate,
     _identity_error,
+    _internal,
     _invalid,
     _load_json,
     _nonnegative_length,
@@ -130,7 +131,8 @@ def validate_snapshot(document: object) -> AnalysisInput:
         nominal = item.nominal if observation is None else observation.nominal
         deviations = item.deviations
         if expected_source == "cad":
-            assert observation is not None
+            if observation is None:
+                _internal(f"CAD dimension {identifier!r} has no extraction record.")
             deviations = observation.deviations
             if deviations is None:
                 raise ContractError(_tolerance_error(item, spec_index, "/case"), ExitStatus.INVALID_INPUT)

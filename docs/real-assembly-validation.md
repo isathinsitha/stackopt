@@ -4,6 +4,27 @@
 
 ## Verified evidence
 
+### Public LIGO locker case
+
+The source set contains five public drawings, three native SOLIDWORKS parts and an assembly procedure. The [source manifest](../examples/ligo-locker/sources.json) records download URLs and SHA-256 hashes. The [case write-up](../examples/ligo-locker/README.md) records drawing revisions, configuration, material information, the signed chain, tolerance alternatives and reproduction commands.
+
+The studied decision is whether to keep the D1000860-v2 sleeve bore limits or restore the wider v1 interval while retaining the D047935-v4 pin. The analyst selected preservation of the revised drawing's size-clearance envelope at an assumed 20 °C reference state as the comparison criterion. Engineering approval of that criterion remains pending.
+
+| Sleeve interval | Clearance (µm) | Minimum margin (µm) | Maximum margin (µm) |
+| --- | ---: | ---: | ---: |
+| Keep v2 | 12.7–38.1 | 0 | 0 |
+| Restore v1 | 0–63.5 | −12.7 | −25.4 |
+
+Independent decimal endpoint enumeration agrees exactly with StackOpt's manual analysis and CAD snapshot replay. Keeping v2 is the only feasible assignment under the study criterion. The restored interval's controlling violation combines the upper bore limit with the lower pin diameter limit. Its maximum-side margin is −25.4 µm. [Independent check result](../examples/ligo-locker/independent-check.json)
+
+Live SOLIDWORKS extraction used downloaded part copies placed separately in an inspection assembly. Drawing inputs supplied the tolerances. The snapshot retains warnings for missing native model tolerances and modified in-memory part states. Source-file and inspection-copy hashes were verified after capture. The public snapshot uses neutral document references in place of machine-specific paths. [Replay snapshot](../examples/ligo-locker/cad.snapshot.json)
+
+A clean Windows Python 3.12 installation passed all 84 tests, `pip check`, and the independent case check. All six PR CI jobs passed on commit `547de23`, including the independent case check on Linux and Windows with Python 3.11, 3.12 and 3.13. [Case CI run](https://github.com/isathinsitha/stackopt/actions/runs/44138731083)
+
+Retain the issued sleeve limits under the stated study criterion. Wide release remains pending engineering review of the actual local gap, alignment, locked restraint or allowable play, stage movement and operating conditions. The published procedure's sleeve part-number inconsistency also remains open. G05 stays open until that review establishes the applicable functional requirements and whether a shared callout affects several approved requirements.
+
+### Original fixture verification
+
 The clean Windows Python 3.12 install passed `pip check` and all 84 tests at `81e80ca`. All six Linux and Windows CI jobs passed on that commit. The saved native SOLIDWORKS and FreeCAD fixture snapshots reproduced eight analysis and allocation reports byte for byte, with matching exit codes. Reimporting both saved FreeCAD record sets also reproduced their snapshots. The live extraction evidence is limited to the fixture and CAD versions described in the [CAD guide](usage.md#cad-extraction). [CI run](https://github.com/isathinsitha/stackopt/actions/runs/44128744463)
 
 ### Independent benchmark check

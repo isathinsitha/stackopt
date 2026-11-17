@@ -17,6 +17,7 @@ from .contracts import (
     CalloutRef,
     Candidate,
     CandidateExplanation,
+    ContributionChange,
     DecimalText,
     Deviations,
     Evaluation,
@@ -107,12 +108,14 @@ def _explain_candidate(
         lower_at_temperature, upper_at_temperature = point_bounds[temperature]
         same_temperature = upper_at_temperature if upper else lower_at_temperature
         by_physical_id = {term["physical_id"]: term["contribution"] for term in same_temperature["terms"]}
-        terms = [{"physical_id": term["physical_id"], "baseline_contribution": term["contribution"],
-                  "candidate_contribution": by_physical_id[term["physical_id"]]}
-                 for term in baseline_bound["terms"]]
+        terms: list[ContributionChange[Fraction]] = [
+            {"physical_id": term["physical_id"], "baseline_contribution": term["contribution"],
+             "candidate_contribution": by_physical_id[term["physical_id"]]}
+            for term in baseline_bound["terms"]
+        ]
         sign = -1 if upper else 1
-        before = baseline["margins"][side]
-        after = evaluation["margins"][side]
+        before = cast(Fraction, baseline["margins"][side])
+        after = cast(Fraction, evaluation["margins"][side])
         margins[side] = {
             "baseline_margin": before,
             "candidate_margin": after,
@@ -261,7 +264,7 @@ def _allocation_lines(report: AllocationResult) -> list[str]:
     for candidate in report["feasible_candidates"]:
         evaluation = candidate["evaluation"]
         margins = ", ".join(f"{side} {_margin_um(margin)}"
-                            for side, margin in evaluation["margins"].items())
+                            for side, margin in cast(dict[str, DecimalText], evaluation["margins"]).items())
         score = f" | score {candidate['total_score']}" if "total_score" in candidate else ""
         lines.append(f"  Feasible #{candidate['index']} | {margins}{score}")
         by_callout = {callout_key(entry["callout"]): entry["limits"]["deviations"]
@@ -288,18 +291,20 @@ def _explanation_lines(report: AllocationResult, explanation: CandidateExplanati
         lines.append(f"    {_callout_text(change['callout'])} | option {change['option_id']!r} | "
                      f"{_deviations_text(change['before'])} -> {_deviations_text(change['after'])}")
     lines.append("  Margin changes from baseline")
-    for side, change in explanation["margins"].items():
-        lines.append(f"    {side}: {_margin_um(change['baseline_margin'])} -> "
-                     f"{_margin_um(change['candidate_margin'])} (delta {_margin_um(change['margin_delta'])})")
-        baseline_temp = change["baseline_temperature"]
-        candidate_temp = change["candidate_temperature"]
+    side_changes = cast(dict[str, MarginChange[DecimalText]], explanation["margins"])
+    for side, margin_change in side_changes.items():
+        lines.append(f"    {side}: {_margin_um(margin_change['baseline_margin'])} -> "
+                     f"{_margin_um(margin_change['candidate_margin'])} "
+                     f"(delta {_margin_um(margin_change['margin_delta'])})")
+        baseline_temp = margin_change["baseline_temperature"]
+        candidate_temp = margin_change["candidate_temperature"]
         lines.append(f"      Same-temperature margin delta at {baseline_temp} °C: "
-                     f"{_margin_um(change['same_temperature_delta'])}")
-        for term in change["terms"]:
+                     f"{_margin_um(margin_change['same_temperature_delta'])}")
+        for term in margin_change["terms"]:
             lines.append(f"        {term['physical_id']}: {_signed(term['baseline_contribution'])} -> "
                          f"{_signed(term['candidate_contribution'])} mm signed contribution")
         lines.append(f"      Governing temperature {baseline_temp} -> {candidate_temp} °C | "
-                     f"margin delta {_margin_um(change['governing_temperature_delta'])}")
+                     f"margin delta {_margin_um(margin_change['governing_temperature_delta'])}")
     return lines
 
 

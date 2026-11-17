@@ -18,6 +18,7 @@ from .contracts import (
     CalloutRef,
     CaseDocument,
     Chain,
+    ChainTerm,
     Deviations,
     DimensionSpec,
     DrawingLimits,
@@ -205,7 +206,7 @@ def _callout(value: object, path: str) -> CalloutRef:
 def _chain(value: object, path: str) -> Chain[Fraction]:
     data = _object(value, path, ("id", "terms"))
     identifier = _text(data["id"], f"{path}/id")
-    terms = []
+    terms: list[ChainTerm[Fraction]] = []
     for index, term in enumerate(_array(data["terms"], f"{path}/terms", nonempty=True)):
         pointer = f"{path}/terms/{index}"
         fields = _object(term, pointer, ("logical_id", "coefficient"))
@@ -558,7 +559,10 @@ def _cad_source(value: object, path: str) -> CadSource:
     return cast(CadSource, data)
 
 
-def _observed_key(source: CadSource) -> tuple[str, str, str, tuple[str, ...], str, str, str]:
+_ObservedKey = tuple[str, str, str, tuple[str, ...], str, str, str]
+
+
+def _observed_key(source: CadSource) -> _ObservedKey:
     return (
         source["adapter"], source["assembly"]["id"], source["assembly_configuration"],
         tuple(source["occurrence_path"]), source["document"]["id"],
@@ -608,8 +612,8 @@ def _read_observations(
     seen: set[str] = set()
     observations: dict[str, _Observation] = {}
     reported: dict[str, list[Diagnostic]] = {}
-    physical_by_observed = {}
-    observed_by_physical = {}
+    physical_by_observed: dict[_ObservedKey, str] = {}
+    observed_by_physical: dict[str, _ObservedKey] = {}
     freecad_document: CadDocumentRef | None = None
     for index, record in enumerate(records):
         pointer = f"{path}/{index}"
@@ -628,8 +632,8 @@ def _read_observations(
                      "Supply exactly one record per CAD binding.", f"{pointer}/logical_id")
         seen.add(identifier)
         diagnostics = _diagnostics(data["diagnostics"], f"{pointer}/diagnostics")
-        for diag_index, item in enumerate(diagnostics):
-            if item.get("logical_id", identifier) != identifier:
+        for diag_index, diagnostic in enumerate(diagnostics):
+            if diagnostic.get("logical_id", identifier) != identifier:
                 _identity_error(f"{pointer}/diagnostics/{diag_index}/logical_id",
                                 "The diagnostic names a different binding.")
         has_error = any(item["severity"] == "error" for item in diagnostics)
@@ -653,7 +657,7 @@ def _read_observations(
         nominal_spec = spec["nominal"]
         assert nominal_spec["kind"] == "cad"
         for key, requested in nominal_spec["target"].items():
-            if source[key] != requested:
+            if cast(dict[str, object], source)[key] != requested:
                 _identity_error(f"{pointer}/source/{key}", "The observation does not match the requested target.")
         observed = _observed_key(source)
         physical = spec["physical_id"]

@@ -5,7 +5,7 @@ from fractions import Fraction
 from itertools import product
 from math import prod
 from time import monotonic_ns
-from typing import Literal, NotRequired, TypedDict
+from typing import Literal, NotRequired, TypedDict, cast
 
 from .analysis import evaluate
 from .contract_validation import format_decimal_text
@@ -199,7 +199,8 @@ def allocate(
             feasible.append(candidate)
             nearest = None
         elif not feasible:
-            violation = max(Fraction(0), -min(evaluation["margins"].values()))
+            margins = cast(dict[str, Fraction], evaluation["margins"])
+            violation = max(Fraction(0), -min(margins.values()))
             if nearest is None or violation < nearest[0]:
                 nearest = violation, candidate
 

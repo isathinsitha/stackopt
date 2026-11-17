@@ -2,6 +2,7 @@
 
 import argparse
 from collections.abc import Sequence
+from fractions import Fraction
 from io import TextIOWrapper
 from pathlib import Path
 import signal
@@ -12,7 +13,8 @@ from typing import Protocol, TextIO
 from .allocation import AllocationRun, allocate
 from .analysis import evaluate
 from .case import ExtractionError, cad_bindings, load_case, load_extraction_records, resolve_case
-from .contracts import AllocationResult, AnalysisResult
+from .contract_validation import parse_decimal_text
+from .contracts import AllocationResult, AnalysisResult, SearchBudget
 from .diagnostics import ContractError, Diagnostic, ExitStatus
 from .report import (
     build_allocation_report,
@@ -34,7 +36,9 @@ class CommandHandlers(Protocol):
 
     def analyze(self, source: Path, *, json_out: Path | None) -> object: ...
 
-    def allocate(self, source: Path, *, json_out: Path | None) -> object: ...
+    def allocate(
+        self, source: Path, *, json_out: Path | None, budget: SearchBudget[Fraction] | None = None,
+    ) -> object: ...
 
 
 _SEARCH_EXITS = {
@@ -64,10 +68,10 @@ def _write_report(report: AnalysisResult | AllocationResult, json_out: Path | No
     _write_stream(sys.stderr, render_diagnostics(report["diagnostics"]))
 
 
-def _search(inputs: AnalysisInput) -> AllocationRun:
+def _search(inputs: AnalysisInput, budget: SearchBudget[Fraction] | None = None) -> AllocationRun:
     """Ask the allocator to stop between candidates when Ctrl+C arrives."""
     if current_thread() is not main_thread():
-        return allocate(inputs.problem)
+        return allocate(inputs.problem, budget=budget)
 
     interrupted = False
 
@@ -77,7 +81,7 @@ def _search(inputs: AnalysisInput) -> AllocationRun:
 
     previous = signal.signal(signal.SIGINT, request_stop)
     try:
-        return allocate(inputs.problem, should_stop=lambda: interrupted)
+        return allocate(inputs.problem, budget=budget, should_stop=lambda: interrupted)
     finally:
         signal.signal(signal.SIGINT, previous)
 
@@ -107,12 +111,34 @@ class _ProductionHandlers:
         _write_report(build_analysis_report(inputs, evaluate(inputs.problem)), json_out)
         return ExitStatus.SUCCESS
 
-    def allocate(self, source: Path, *, json_out: Path | None) -> ExitStatus:
+    def allocate(
+        self, source: Path, *, json_out: Path | None, budget: SearchBudget[Fraction] | None = None,
+    ) -> ExitStatus:
         inputs = load_problem(source)
-        report = build_allocation_report(inputs, _search(inputs))
+        report = build_allocation_report(inputs, _search(inputs, budget))
         status = _SEARCH_EXITS[report["search"]["status"]]
         _write_report(report, json_out)
         return status
+
+
+def _evaluation_limit(text: str) -> int:
+    try:
+        value = int(text, 10)
+    except ValueError:
+        value = -1
+    if value < 0:
+        raise argparse.ArgumentTypeError("expected a nonnegative whole number")
+    return value
+
+
+def _seconds_limit(text: str) -> Fraction:
+    try:
+        value = parse_decimal_text(text, "")
+    except ContractError:
+        raise argparse.ArgumentTypeError('expected a nonnegative decimal such as "30" or "2.5"') from None
+    if value < 0:
+        raise argparse.ArgumentTypeError('expected a nonnegative decimal such as "30" or "2.5"')
+    return value
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -140,6 +166,11 @@ def build_parser() -> argparse.ArgumentParser:
         command = commands.add_parser(name, help=help_text, allow_abbrev=False)
         command.add_argument("source", type=Path, help="Manual case or saved snapshot JSON")
         command.add_argument("--json", type=Path, help="Write the result to this JSON file")
+        if name == "allocate":
+            command.add_argument("--max-evaluations", type=_evaluation_limit, metavar="N",
+                                 help="Stop after evaluating N assignments")
+            command.add_argument("--max-seconds", type=_seconds_limit, metavar="SECONDS",
+                                 help="Stop starting new assignments after this many seconds")
 
     return parser
 
@@ -154,6 +185,13 @@ def dispatch(args: argparse.Namespace, handlers: CommandHandlers) -> object:
     if args.command == "analyze":
         return handlers.analyze(args.source, json_out=args.json)
     if args.command == "allocate":
+        budget: SearchBudget[Fraction] = {}
+        if args.max_evaluations is not None:
+            budget["max_evaluations"] = args.max_evaluations
+        if args.max_seconds is not None:
+            budget["max_seconds"] = args.max_seconds
+        if budget:
+            return handlers.allocate(args.source, json_out=args.json, budget=budget)
         return handlers.allocate(args.source, json_out=args.json)
     raise ValueError(f"Unknown command: {args.command}")
 

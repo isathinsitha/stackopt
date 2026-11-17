@@ -70,8 +70,8 @@ def _snapshot_dimension(
     expected = _drawing_limits(nominal, deviations, f"{limit_path}/lower")
     lower = parse_decimal_text(limits["lower"], f"{limit_path}/lower")
     upper = parse_decimal_text(limits["upper"], f"{limit_path}/upper")
-    for side, bound in (("lower", lower), ("upper", upper)):
-        if expected[side] != bound:
+    for side, bound, limit in (("lower", lower, expected["lower"]), ("upper", upper, expected["upper"])):
+        if limit != bound:
             _invalid("input.invalid_value", "The drawing limit does not equal nominal plus deviation.",
                      "Supply the matching absolute drawing limit.", f"{limit_path}/{side}")
     source = _choice(data["tolerance_source"], f"{path}/tolerance_source", "manual", "cad")
@@ -118,12 +118,13 @@ def validate_snapshot(document: object) -> AnalysisInput:
         item = case.dimensions[spec_index]
         spec = item.spec
         expected_source = spec["tolerance"]["kind"]
-        for field, expected in (
-            ("physical_id", spec["physical_id"]),
-            ("callout", spec["callout"]),
-            ("tolerance_source", expected_source),
-        ):
-            if dimension[field] != expected:
+        identities: tuple[tuple[str, object, object], ...] = (
+            ("physical_id", dimension["physical_id"], spec["physical_id"]),
+            ("callout", dimension["callout"], spec["callout"]),
+            ("tolerance_source", dimension["tolerance_source"], expected_source),
+        )
+        for field, stored, declared in identities:
+            if stored != declared:
                 _identity_error(f"{pointer}/{field}", "The stored identity or source disagrees with the case.")
         _check_alpha(dimension["alpha"], problem["model"], f"{pointer}/alpha")
         observation = observations.get(identifier)
@@ -135,11 +136,12 @@ def validate_snapshot(document: object) -> AnalysisInput:
             deviations = observation.deviations
             if deviations is None:
                 raise ContractError(_tolerance_error(item, spec_index, "/case"), ExitStatus.INVALID_INPUT)
-        for field, actual, expected in (
+        quantities: tuple[tuple[str, object, object], ...] = (
             ("alpha", dimension["alpha"], item.alpha),
             ("nominal", dimension["nominal"], nominal),
             ("drawing_limits/deviations", dimension["drawing_limits"]["deviations"], deviations),
-        ):
+        )
+        for field, actual, expected in quantities:
             if actual != expected:
                 _invalid("input.invalid_value", "The stored quantity disagrees with its frozen source.",
                          "Supply the original complete snapshot.", f"{pointer}/{field}")

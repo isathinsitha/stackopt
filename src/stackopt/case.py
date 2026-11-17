@@ -470,7 +470,8 @@ def _load_json(path: Path) -> object:
             ExitStatus.INVALID_INPUT,
         ) from exc
     try:
-        return json.loads(raw.decode("utf-8"), object_pairs_hook=unique_object, parse_constant=reject_constant)
+        # Windows editors and PowerShell often prefix UTF-8 files with a byte-order mark.
+        return json.loads(raw.decode("utf-8-sig"), object_pairs_hook=unique_object, parse_constant=reject_constant)
     except (ValueError, RecursionError) as exc:
         raise ContractError(
             {"code": "input.malformed_json", "severity": "error", "message": f"Invalid JSON: {exc}",

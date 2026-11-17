@@ -11,7 +11,13 @@ Run these commands from the repository root after `python -m pip install .`. The
 | `stackopt extract solidworks --active --case CASE --out SNAPSHOT` | Bound case and active SOLIDWORKS assembly | Versioned snapshot with resolved inputs and extraction provenance |
 | `stackopt extract freecad --records RECORDS --case CASE --out SNAPSHOT` | Bound case and JSON records exported from FreeCAD | Versioned snapshot with the same replay format |
 
-Add `--json RESULT` to `analyze` or `allocate` to write a UTF-8 JSON report. Terminal reports go to stdout by default. Warnings and application diagnostics go to stderr. JSON mode also emits application errors as structured JSON on stderr. Snapshot and report writes replace destinations atomically after successful serialization.
+Add `--json RESULT` to `analyze` or `allocate` to write a UTF-8 JSON report. Terminal reports go to stdout by default. Warnings and application diagnostics go to stderr. JSON mode also emits application errors as structured JSON on stderr. Snapshot and report writes replace destinations atomically after successful serialization. The terminal lists at most 20 feasible assignments, always including the best-ranked ones; the JSON report keeps all of them.
+
+Large option sets grow multiplicatively. Bound an `allocate` run with `--max-evaluations N`, `--max-seconds SECONDS`, or both. The search checks each limit before starting the next assignment, so the last evaluation may finish after the time limit. A stopped run exits `7` and records the budget and stop reason in the report.
+
+```bash
+stackopt allocate case.json --max-evaluations 100000 --max-seconds 60 --json allocation.json
+```
 
 | Exit | Meaning |
 | --- | --- |
@@ -22,7 +28,7 @@ Add `--json RESULT` to `analyze` or `allocate` to write a UTF-8 JSON report. Ter
 | `4` | CAD unavailable |
 | `5` | Extraction failed |
 | `6` | Complete search with zero feasible assignments |
-| `7` | Incomplete search, including a cooperative `Ctrl+C` stop |
+| `7` | Incomplete search, including a budget or cooperative `Ctrl+C` stop |
 
 For `analyze`, check `baseline.meets_requirement` in the JSON even when the process exits `0`. Exit `6` applies only to the supplied discrete options and model. An interrupted `allocate` run reports how many assignments finished and qualifies any partial ranking.
 

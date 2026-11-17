@@ -50,6 +50,8 @@ def check_evaluation(actual, expected):
 
 
 def main():
+    if not __debug__:
+        sys.exit("This check uses assert statements. Run it without python -O.")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshot", type=Path, default=HERE / "cad.snapshot.json")
     args = parser.parse_args()

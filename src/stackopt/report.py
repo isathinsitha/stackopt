@@ -30,6 +30,8 @@ from .snapshot import AnalysisInput
 
 _Bound = Literal["lower_bound", "upper_bound"]
 _Role = Literal["selected", "provisional_best", "closest_tested", "closest_so_far"]
+# The JSON report keeps every feasible candidate. The terminal shows a readable subset.
+_TERMINAL_CANDIDATE_LIMIT = 20
 _SIDE_BOUNDS: dict[Side, _Bound] = {"minimum": "lower_bound", "maximum": "upper_bound"}
 _ROLES: dict[_Role, str] = {
     "selected": "Selected feasible candidate",
@@ -255,10 +257,19 @@ def _allocation_lines(report: AllocationResult) -> list[str]:
     elif ranking["best_candidate_indices"]:
         best = ranking["best_candidate_indices"]
         status = "Best evaluated" if ranking["status"] == "provisional" else "Best"
-        candidates = ", ".join(f"#{index}" for index in best)
+        candidates = ", ".join(f"#{index}" for index in best[:_TERMINAL_CANDIDATE_LIMIT])
+        if len(best) > _TERMINAL_CANDIDATE_LIMIT:
+            candidates += f" and {len(best) - _TERMINAL_CANDIDATE_LIMIT} more"
         ties = " (tie)" if len(best) > 1 else ""
         lines.append(f"  {status}: {candidates}{ties}")
-    for candidate in report["feasible_candidates"]:
+    feasible = report["feasible_candidates"]
+    # Show the best candidates first, then fill the limit in search order.
+    shown = set(ranking["best_candidate_indices"][:_TERMINAL_CANDIDATE_LIMIT])
+    for candidate in feasible:
+        if len(shown) >= _TERMINAL_CANDIDATE_LIMIT:
+            break
+        shown.add(candidate["index"])
+    for candidate in (item for item in feasible if item["index"] in shown):
         evaluation = candidate["evaluation"]
         margins = ", ".join(f"{side} {_margin_um(margin)}"
                             for side, margin in evaluation["margins"].items())
@@ -270,6 +281,9 @@ def _allocation_lines(report: AllocationResult) -> list[str]:
             callout = option["callout"]
             deviations = by_callout[callout_key(callout)]
             lines.append(f"    {_callout_text(callout)} -> {option['option_id']!r} | {_deviations_text(deviations)} deviations")
+    hidden = len(feasible) - len(shown)
+    if hidden > 0:
+        lines.append(f"  {hidden} more feasible assignments not shown. Use --json for the full list.")
     return lines
 
 

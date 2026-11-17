@@ -36,6 +36,28 @@ def _run_scenario(scenario):
 
 
 class ReportTests(unittest.TestCase):
+    def test_terminal_lists_a_bounded_subset_of_feasible_candidates(self):
+        case = load("manual-case.json")
+        case["requirement"] = {"id": case["requirement"]["id"],
+                               "minimum": quantity("-10"), "maximum": quantity("10")}
+        for group in case["option_groups"]:
+            # The loosest option is cheapest, so the best candidate is last in search order.
+            group["options"] = [
+                {"id": f"opt-{index}", "score": {"value": str(7 - index)},
+                 "deviations": {"lower": quantity(f"-0.0{index}"), "upper": quantity(f"0.0{index}")}}
+                for index in range(1, 7)
+            ]
+        source = _source(case)
+        report = build_allocation_report(source, allocate(source.problem))
+        self.assertEqual(len(report["feasible_candidates"]), 36)
+        terminal = render_terminal(report)
+        self.assertEqual(terminal.count("  Feasible #"), 20)
+        self.assertIn("16 more feasible assignments not shown. Use --json for the full list.", terminal)
+        self.assertEqual(report["ranking"]["best_candidate_indices"], [35])
+        self.assertIn("  Feasible #35 |", terminal)
+        self.assertNotIn("  Feasible #19 |", terminal)
+        self.assertEqual(len(json.loads(render_json(report))["feasible_candidates"]), 36)
+
     def test_json_report_projects_every_acceptance_scenario(self):
         reference = load("reference.json")
         for scenario in load("report-cases.json"):

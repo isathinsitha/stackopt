@@ -1,5 +1,6 @@
 import unittest
 from contextlib import redirect_stderr, redirect_stdout
+from fractions import Fraction
 from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -70,6 +71,31 @@ class CliTests(unittest.TestCase):
             handlers.analyze.assert_called_once_with(snapshot, json_out=report)
             handlers.allocate.assert_called_once_with(snapshot, json_out=None)
             stub_adapter.extract_active.assert_called_once_with(("stub binding",))
+
+    def test_routes_allocation_budget_flags(self):
+        handlers = Mock(spec=CommandHandlers)
+        source = Path("manual.json")
+        main(["allocate", str(source), "--max-evaluations", "250", "--max-seconds", "2.5"], handlers=handlers)
+        handlers.allocate.assert_called_once_with(
+            source, json_out=None, budget={"max_evaluations": 250, "max_seconds": Fraction("2.5")},
+        )
+        handlers.reset_mock()
+        main(["allocate", str(source), "--max-seconds", "0"], handlers=handlers)
+        handlers.allocate.assert_called_once_with(source, json_out=None, budget={"max_seconds": 0})
+
+    def test_rejects_invalid_budget_values_before_dispatch(self):
+        handlers = Mock(spec=CommandHandlers)
+        for argv in (
+            ["--max-evaluations", "-1"], ["--max-evaluations", "1.5"], ["--max-evaluations", "ten"],
+            ["--max-seconds", "-0.5"], ["--max-seconds", "1e3"], ["--max-seconds", "NaN"],
+        ):
+            with self.subTest(argv=argv), redirect_stderr(StringIO()):
+                with self.assertRaises(SystemExit) as exit_info:
+                    main(["allocate", "manual.json", *argv], handlers=handlers)
+                self.assertEqual(exit_info.exception.code, 2)
+        with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
+            main(["analyze", "manual.json", "--max-evaluations", "1"], handlers=handlers)
+        self.assertEqual(handlers.mock_calls, [])
 
     def test_dispatch_returns_the_handler_outcome_unchanged(self):
         handlers = Mock(spec=CommandHandlers)

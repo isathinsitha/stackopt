@@ -1,0 +1,398 @@
+{
+  "kind": "snapshot",
+  "schema_version": 1,
+  "case": {
+    "kind": "case",
+    "schema_version": 1,
+    "case_id": "ligo-stage-0-1-locker-size-study",
+    "scope": "single_chain",
+    "chain": {
+      "id": "diametral-size-clearance",
+      "terms": [
+        {
+          "logical_id": "sleeve-bore",
+          "coefficient": "1"
+        },
+        {
+          "logical_id": "pin-sphere-radius",
+          "coefficient": "-2"
+        }
+      ]
+    },
+    "requirement": {
+      "id": "study-preserve-v2-size-envelope",
+      "minimum": {
+        "value": "0.0005",
+        "unit": "in"
+      },
+      "maximum": {
+        "value": "0.0015",
+        "unit": "in"
+      }
+    },
+    "model": {
+      "kind": "linear_free_expansion",
+      "reference": {
+        "value": "20",
+        "unit": "degC"
+      },
+      "operating_min": {
+        "value": "20",
+        "unit": "degC"
+      },
+      "operating_max": {
+        "value": "20",
+        "unit": "degC"
+      }
+    },
+    "dimensions": [
+      {
+        "logical_id": "sleeve-bore",
+        "physical_id": "stage-0-1-sleeve-bore",
+        "callout": {
+          "document_id": "LIGO-D1000860",
+          "dimension_id": "small-bore-diameter",
+          "revision": "v2",
+          "configuration": "Stage 0-1"
+        },
+        "alpha": {
+          "value": "0",
+          "unit": "1/K"
+        },
+        "nominal": {
+          "kind": "cad",
+          "target": {
+            "adapter": "solidworks",
+            "occurrence_path": [
+              "Sleeve-1"
+            ],
+            "configuration": "Default",
+            "dimension_id": "D1@Sketch1"
+          }
+        },
+        "tolerance": {
+          "kind": "manual",
+          "deviations": {
+            "lower": {
+              "value": "0",
+              "unit": "in"
+            },
+            "upper": {
+              "value": "0.0005",
+              "unit": "in"
+            }
+          },
+          "source_ref": "LIGO D1000860-v2 sheet 1, small bore +.0005/-.0000 in"
+        }
+      },
+      {
+        "logical_id": "pin-sphere-radius",
+        "physical_id": "stage-0-1-pin-sphere-radius",
+        "callout": {
+          "document_id": "LIGO-D047935",
+          "dimension_id": "sphere-diameter-as-radius",
+          "revision": "v4",
+          "configuration": "Stage 0-1"
+        },
+        "alpha": {
+          "value": "0",
+          "unit": "1/K"
+        },
+        "nominal": {
+          "kind": "cad",
+          "target": {
+            "adapter": "solidworks",
+            "occurrence_path": [
+              "Pin-1"
+            ],
+            "configuration": "Default",
+            "dimension_id": "D2@Sketch1"
+          }
+        },
+        "tolerance": {
+          "kind": "manual",
+          "deviations": {
+            "lower": {
+              "value": "-0.00025",
+              "unit": "in"
+            },
+            "upper": {
+              "value": "0",
+              "unit": "in"
+            }
+          },
+          "source_ref": "Half of LIGO D047935-v4 sphere diameter deviations -.0005/+.0000 in"
+        }
+      }
+    ],
+    "option_groups": [
+      {
+        "callout": {
+          "document_id": "LIGO-D1000860",
+          "dimension_id": "small-bore-diameter",
+          "revision": "v2",
+          "configuration": "Stage 0-1"
+        },
+        "options": [
+          {
+            "id": "keep-v2-limits",
+            "deviations": {
+              "lower": {
+                "value": "0",
+                "unit": "in"
+              },
+              "upper": {
+                "value": "0.0005",
+                "unit": "in"
+              }
+            }
+          },
+          {
+            "id": "study-restore-v1-limits",
+            "deviations": {
+              "lower": {
+                "value": "-0.0005",
+                "unit": "in"
+              },
+              "upper": {
+                "value": "0.0015",
+                "unit": "in"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "problem": {
+    "scope": "single_chain",
+    "chain": {
+      "id": "diametral-size-clearance",
+      "terms": [
+        {
+          "logical_id": "sleeve-bore",
+          "coefficient": "1"
+        },
+        {
+          "logical_id": "pin-sphere-radius",
+          "coefficient": "-2"
+        }
+      ]
+    },
+    "requirement": {
+      "id": "study-preserve-v2-size-envelope",
+      "minimum": "0.0127",
+      "maximum": "0.0381"
+    },
+    "model": {
+      "kind": "linear_free_expansion",
+      "reference": "20",
+      "operating_min": "20",
+      "operating_max": "20"
+    },
+    "dimensions": [
+      {
+        "logical_id": "sleeve-bore",
+        "physical_id": "stage-0-1-sleeve-bore",
+        "callout": {
+          "document_id": "LIGO-D1000860",
+          "dimension_id": "small-bore-diameter",
+          "revision": "v2",
+          "configuration": "Stage 0-1"
+        },
+        "alpha": "0",
+        "nominal": "38.1127",
+        "drawing_limits": {
+          "lower": "38.1127",
+          "upper": "38.1254",
+          "deviations": {
+            "lower": "0",
+            "upper": "0.0127"
+          }
+        },
+        "tolerance_source": "manual"
+      },
+      {
+        "logical_id": "pin-sphere-radius",
+        "physical_id": "stage-0-1-pin-sphere-radius",
+        "callout": {
+          "document_id": "LIGO-D047935",
+          "dimension_id": "sphere-diameter-as-radius",
+          "revision": "v4",
+          "configuration": "Stage 0-1"
+        },
+        "alpha": "0",
+        "nominal": "19.05",
+        "drawing_limits": {
+          "lower": "19.04365",
+          "upper": "19.05",
+          "deviations": {
+            "lower": "-0.00635",
+            "upper": "0"
+          }
+        },
+        "tolerance_source": "manual"
+      }
+    ],
+    "option_groups": [
+      {
+        "callout": {
+          "document_id": "LIGO-D1000860",
+          "dimension_id": "small-bore-diameter",
+          "revision": "v2",
+          "configuration": "Stage 0-1"
+        },
+        "options": [
+          {
+            "id": "keep-v2-limits",
+            "deviations": {
+              "lower": "0",
+              "upper": "0.0127"
+            }
+          },
+          {
+            "id": "study-restore-v1-limits",
+            "deviations": {
+              "lower": "-0.0127",
+              "upper": "0.0381"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "extraction_records": [
+    {
+      "kind": "cad_extraction",
+      "schema_version": 1,
+      "logical_id": "sleeve-bore",
+      "status": "resolved",
+      "source": {
+        "adapter": "solidworks",
+        "application": "SOLIDWORKS",
+        "application_version": "34.2.1",
+        "assembly": {
+          "id": "study:Inspection.SLDASM",
+          "path": "study:Inspection.SLDASM",
+          "state": "saved"
+        },
+        "assembly_configuration": "Default",
+        "occurrence_path": [
+          "Sleeve-1"
+        ],
+        "document": {
+          "id": "public:ligo-dcc/sleeve-bore.SLDPRT",
+          "path": "public:ligo-dcc/sleeve-bore.SLDPRT",
+          "state": "modified"
+        },
+        "configuration": "Default",
+        "dimension_id": "D1@Sketch1"
+      },
+      "nominal": {
+        "value": "0.0381127",
+        "unit": "m"
+      },
+      "tolerance": {
+        "status": "missing",
+        "native_type": 0,
+        "native_status": {
+          "GetMinValue2": 1,
+          "GetMaxValue2": 1
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "cad.tolerance_unresolved",
+          "severity": "warning",
+          "logical_id": "sleeve-bore",
+          "message": "The dimension has no model tolerance.",
+          "recovery": "Supply an explicit sourced tolerance in the case or use a qualified model tolerance.",
+          "source_ref": "public:ligo-dcc/sleeve-bore.SLDPRT"
+        }
+      ]
+    },
+    {
+      "kind": "cad_extraction",
+      "schema_version": 1,
+      "logical_id": "pin-sphere-radius",
+      "status": "resolved",
+      "source": {
+        "adapter": "solidworks",
+        "application": "SOLIDWORKS",
+        "application_version": "34.2.1",
+        "assembly": {
+          "id": "study:Inspection.SLDASM",
+          "path": "study:Inspection.SLDASM",
+          "state": "saved"
+        },
+        "assembly_configuration": "Default",
+        "occurrence_path": [
+          "Pin-1"
+        ],
+        "document": {
+          "id": "public:ligo-dcc/pin-sphere-radius.SLDPRT",
+          "path": "public:ligo-dcc/pin-sphere-radius.SLDPRT",
+          "state": "modified"
+        },
+        "configuration": "Default",
+        "dimension_id": "D2@Sketch1"
+      },
+      "nominal": {
+        "value": "0.01905",
+        "unit": "m"
+      },
+      "tolerance": {
+        "status": "missing",
+        "native_type": 0,
+        "native_status": {
+          "GetMinValue2": 1,
+          "GetMaxValue2": 1
+        }
+      },
+      "diagnostics": [
+        {
+          "code": "cad.tolerance_unresolved",
+          "severity": "warning",
+          "logical_id": "pin-sphere-radius",
+          "message": "The dimension has no model tolerance.",
+          "recovery": "Supply an explicit sourced tolerance in the case or use a qualified model tolerance.",
+          "source_ref": "public:ligo-dcc/pin-sphere-radius.SLDPRT"
+        }
+      ]
+    }
+  ],
+  "diagnostics": [
+    {
+      "code": "cad.tolerance_unresolved",
+      "severity": "warning",
+      "logical_id": "sleeve-bore",
+      "message": "The dimension has no model tolerance.",
+      "recovery": "Supply an explicit sourced tolerance in the case or use a qualified model tolerance.",
+      "source_ref": "public:ligo-dcc/sleeve-bore.SLDPRT"
+    },
+    {
+      "code": "cad.source_state",
+      "severity": "warning",
+      "message": "Observed CAD document state was modified.",
+      "recovery": "Check the observed document state when comparing or repeating extraction.",
+      "logical_id": "sleeve-bore",
+      "source_ref": "public:ligo-dcc/sleeve-bore.SLDPRT"
+    },
+    {
+      "code": "cad.tolerance_unresolved",
+      "severity": "warning",
+      "logical_id": "pin-sphere-radius",
+      "message": "The dimension has no model tolerance.",
+      "recovery": "Supply an explicit sourced tolerance in the case or use a qualified model tolerance.",
+      "source_ref": "public:ligo-dcc/pin-sphere-radius.SLDPRT"
+    },
+    {
+      "code": "cad.source_state",
+      "severity": "warning",
+      "message": "Observed CAD document state was modified.",
+      "recovery": "Check the observed document state when comparing or repeating extraction.",
+      "logical_id": "pin-sphere-radius",
+      "source_ref": "public:ligo-dcc/pin-sphere-radius.SLDPRT"
+    }
+  ]
+}

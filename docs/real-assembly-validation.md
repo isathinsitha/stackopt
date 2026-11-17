@@ -1,6 +1,6 @@
 # First real-assembly validation
 
-**Open.** The development build has fixture verification. The project still needs a representative assembly with a named drawing decision. [Case intake form](case-intake.md)
+**Open.** The [public LIGO locker drawing study](../examples/ligo-locker/README.md) reproduces source dimensions, live nominal extraction and offline analysis. Its study criterion preserves the issued drawing's size-clearance envelope. The assembly owner's functional requirements and engineering review remain pending. [Case intake form](case-intake.md)
 
 ## Verified evidence
 
@@ -32,6 +32,8 @@ stackopt allocate freecad-fixture.snapshot.json
 ```
 
 ## Evidence needed for the engineering review
+
+The LIGO study has source drawings, explicit revisions, a signed chain, two drawing alternatives, an independent check and a replayable live capture. Its chosen preservation criterion still needs engineering approval. The remaining review concerns the actual functional limits and the additional requirements affected by the adjustable bore.
 
 1. Record the source drawing revision and configuration, the proposed decision, all affected requirements, the signed chains, and the permitted drawing limits. Confirm the source and applicability of any material and operating inputs.
 2. Check that each functional quantity can be represented by a signed linear chain. For a local running gap, check the effect of alignment, geometry, deformation and differences in part temperatures on the decision. If one adjustable callout affects more than one requirement, evaluate the same candidate assignment against every affected requirement before recommending a change. The v1 CLI evaluates one chain per case.

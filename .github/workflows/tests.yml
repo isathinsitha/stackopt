@@ -24,4 +24,5 @@ jobs:
       - run: python -m pip install --no-deps .
       - run: python -m pip check
       - run: python -B -m unittest discover -s tests -v
+      - run: python examples/ligo-locker/independent_check.py
       - run: stackopt allocate examples/acceptance-v1/manual-case.json --json allocation.json

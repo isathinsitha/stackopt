@@ -213,6 +213,13 @@ class SnapshotTests(unittest.TestCase):
                     load_problem(path)
                 self.assertEqual(error.exception.diagnostic["code"], "input.malformed_json")
 
+    def test_reader_accepts_utf8_byte_order_mark(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "input.json"
+            raw = (FIXTURES / "manual-case.json").read_bytes()
+            path.write_bytes(b"\xef\xbb\xbf" + raw)
+            self.assertEqual(load_problem(path).problem, load_problem(FIXTURES / "manual-case.json").problem)
+
     def test_replay_rejects_inconsistent_or_partial_snapshots(self):
         for path, value, field in (
             (("schema_version",), 2, "/schema_version"),

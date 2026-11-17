@@ -131,6 +131,22 @@ class ProductionCliTests(unittest.TestCase):
         self.assertIn("Closest evaluated so far", stdout)
         self.assertIn("warning [search.incomplete]", stderr)
 
+    def test_budget_flags_stop_the_search_and_are_reported(self):
+        source = FIXTURES / "manual-case.json"
+        for flags, budget, evaluated, stop_reason, status in (
+            (("--max-evaluations", "1"), {"max_evaluations": 1}, 1, "evaluation_limit", "incomplete"),
+            (("--max-seconds", "0"), {"max_seconds": "0"}, 0, "time_limit", "zero_tested"),
+        ):
+            with self.subTest(flags=flags):
+                code, stdout, stderr = self.run_cli("allocate", source, *flags, "--json", self.output)
+                self.assertEqual((code, stdout), (7, ""))
+                self.assertIn("search.incomplete", stderr)
+                search = json.loads(self.output.read_text(encoding="utf-8"))["search"]
+                self.assertEqual(search["status"], status)
+                self.assertEqual(search["evaluated"], evaluated)
+                self.assertEqual(search["stop_reason"], stop_reason)
+                self.assertEqual(search["budget"], budget)
+
     def test_terminal_output_for_bore_only_decision(self):
         code, stdout, stderr = self.run_cli("allocate", FIXTURES / "manual-case.json")
         self.assertEqual((code, stderr), (0, ""))

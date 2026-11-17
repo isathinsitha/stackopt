@@ -1,5 +1,7 @@
 # StackOpt
 
+[![Tests](https://github.com/isathinsitha/stackopt/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/isathinsitha/stackopt/actions/workflows/tests.yml)
+
 StackOpt is a Python CLI for worst-case dimensional tolerance analysis. Give it a signed dimension chain, a clearance requirement, and permitted drawing tolerances. It computes the clearance envelope over a temperature range and checks which tolerance combinations satisfy the requirement. Reports identify the dimensions and temperatures that control each bound.
 
 **Status** · Development build (`0.1.0.dev0`). The [public LIGO locker study](examples/ligo-locker/README.md) reproduces drawing size limits, live CAD nominal extraction and offline analysis. Its assembly-level functional review remains open. The [validation record](docs/real-assembly-validation.md) tracks the evidence and pending engineering review.

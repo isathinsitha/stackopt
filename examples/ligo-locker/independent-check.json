@@ -1,0 +1,23 @@
+{
+  "independent_drawing_check": [
+    {
+      "option_id": "keep-v2-limits",
+      "lower_mm": "0.01270",
+      "upper_mm": "0.03810",
+      "minimum_margin_mm": "0.00000",
+      "maximum_margin_mm": "0.00000",
+      "meets_study_criterion": true,
+      "limiting_side": "minimum"
+    },
+    {
+      "option_id": "study-restore-v1-limits",
+      "lower_mm": "0.00000",
+      "upper_mm": "0.06350",
+      "minimum_margin_mm": "-0.01270",
+      "maximum_margin_mm": "-0.02540",
+      "meets_study_criterion": false,
+      "limiting_side": "maximum"
+    }
+  ],
+  "manual_and_snapshot_cli_match": true
+}

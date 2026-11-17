@@ -1,0 +1,157 @@
+{
+  "kind": "case",
+  "schema_version": 1,
+  "case_id": "ligo-stage-0-1-locker-size-study",
+  "scope": "single_chain",
+  "chain": {
+    "id": "diametral-size-clearance",
+    "terms": [
+      {
+        "logical_id": "sleeve-bore",
+        "coefficient": "1"
+      },
+      {
+        "logical_id": "pin-sphere-radius",
+        "coefficient": "-2"
+      }
+    ]
+  },
+  "requirement": {
+    "id": "study-preserve-v2-size-envelope",
+    "minimum": {
+      "value": "0.0005",
+      "unit": "in"
+    },
+    "maximum": {
+      "value": "0.0015",
+      "unit": "in"
+    }
+  },
+  "model": {
+    "kind": "linear_free_expansion",
+    "reference": {
+      "value": "20",
+      "unit": "degC"
+    },
+    "operating_min": {
+      "value": "20",
+      "unit": "degC"
+    },
+    "operating_max": {
+      "value": "20",
+      "unit": "degC"
+    }
+  },
+  "dimensions": [
+    {
+      "logical_id": "sleeve-bore",
+      "physical_id": "stage-0-1-sleeve-bore",
+      "callout": {
+        "document_id": "LIGO-D1000860",
+        "dimension_id": "small-bore-diameter",
+        "revision": "v2",
+        "configuration": "Stage 0-1"
+      },
+      "alpha": {
+        "value": "0",
+        "unit": "1/K"
+      },
+      "nominal": {
+        "kind": "manual",
+        "length": {
+          "value": "1.5005",
+          "unit": "in"
+        },
+        "source_ref": "LIGO D1000860-v2 sheet 1, section B-B, after coating"
+      },
+      "tolerance": {
+        "kind": "manual",
+        "deviations": {
+          "lower": {
+            "value": "0",
+            "unit": "in"
+          },
+          "upper": {
+            "value": "0.0005",
+            "unit": "in"
+          }
+        },
+        "source_ref": "LIGO D1000860-v2 sheet 1, small bore +.0005/-.0000 in"
+      }
+    },
+    {
+      "logical_id": "pin-sphere-radius",
+      "physical_id": "stage-0-1-pin-sphere-radius",
+      "callout": {
+        "document_id": "LIGO-D047935",
+        "dimension_id": "sphere-diameter-as-radius",
+        "revision": "v4",
+        "configuration": "Stage 0-1"
+      },
+      "alpha": {
+        "value": "0",
+        "unit": "1/K"
+      },
+      "nominal": {
+        "kind": "manual",
+        "length": {
+          "value": "0.7500",
+          "unit": "in"
+        },
+        "source_ref": "Half of LIGO D047935-v4 sheet 1 spherical diameter 1.5000 in"
+      },
+      "tolerance": {
+        "kind": "manual",
+        "deviations": {
+          "lower": {
+            "value": "-0.00025",
+            "unit": "in"
+          },
+          "upper": {
+            "value": "0",
+            "unit": "in"
+          }
+        },
+        "source_ref": "Half of LIGO D047935-v4 sphere diameter deviations -.0005/+.0000 in"
+      }
+    }
+  ],
+  "option_groups": [
+    {
+      "callout": {
+        "document_id": "LIGO-D1000860",
+        "dimension_id": "small-bore-diameter",
+        "revision": "v2",
+        "configuration": "Stage 0-1"
+      },
+      "options": [
+        {
+          "id": "keep-v2-limits",
+          "deviations": {
+            "lower": {
+              "value": "0",
+              "unit": "in"
+            },
+            "upper": {
+              "value": "0.0005",
+              "unit": "in"
+            }
+          }
+        },
+        {
+          "id": "study-restore-v1-limits",
+          "deviations": {
+            "lower": {
+              "value": "-0.0005",
+              "unit": "in"
+            },
+            "upper": {
+              "value": "0.0015",
+              "unit": "in"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

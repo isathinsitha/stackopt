@@ -1,0 +1,70 @@
+{
+  "source": "LIGO Document Control Center",
+  "retrieved": "2026-11-17",
+  "files": [
+    {
+      "document": "D1000854",
+      "url": "https://dcc.ligo.org/public/0010/D1000854/003/D1000854-v3%20Stage%200-1%20Lockers%2C%20aLIGO%20BSC%20ISI.pdf",
+      "filename": "D1000854-v3 Stage 0-1 Lockers, aLIGO BSC ISI.pdf",
+      "sha256": "ef182eeee468a3d0555d576f99f386aba8f5fa146d3c52e7dfcfee9a7a261401",
+      "bytes": 376892
+    },
+    {
+      "document": "D047935",
+      "url": "https://dcc.ligo.org/public/0000/D047935/004/D047935-v4%20Locker%20Spherical%20Pin.pdf",
+      "filename": "D047935-v4 Locker Spherical Pin.pdf",
+      "sha256": "c72168d44e8563bbb9a0dacebd006f07f6fcea64859897c80349ecae9625c1bd",
+      "bytes": 29291
+    },
+    {
+      "document": "D047935",
+      "url": "https://dcc.ligo.org/public/0000/D047935/004/D047935_Locker_Spherical_Pin.SLDPRT",
+      "filename": "D047935_Locker_Spherical_Pin.SLDPRT",
+      "sha256": "6c401183ba54dd60583fd2203d0f890c4503ef195d3dd2b1bf734431f8f5e816",
+      "bytes": 624640
+    },
+    {
+      "document": "D1000860",
+      "url": "https://dcc.ligo.org/public/0010/D1000860/002/D1000860-v2%20Sleeve%20Stage%200-1%20Locker%2C%20aLIGO%20BSC%20ISI.pdf",
+      "filename": "D1000860-v2 Sleeve Stage 0-1 Locker, aLIGO BSC ISI.pdf",
+      "sha256": "3069c98a3cc7a6f54e6cc14e5b89b6818487f7ecc941b063c5ec43296fdb20ad",
+      "bytes": 30024
+    },
+    {
+      "document": "D1000860",
+      "url": "https://dcc.ligo.org/public/0010/D1000860/002/D1000860%2C%20Stage%200-1%20Locker%2C%20aLIGO%20BSC-ISI.SLDPRT",
+      "filename": "D1000860, Stage 0-1 Locker, aLIGO BSC-ISI.SLDPRT",
+      "sha256": "be7e54b64e33dcfea7d3d880f130ec57c52ecdb60d21def4d17b90054d65f7da",
+      "bytes": 588288
+    },
+    {
+      "document": "D1000908",
+      "url": "https://dcc.ligo.org/public/0010/D1000908/003/D1000908-v3%20HOUSING%20LOCKER%20SLEEVE%2C%20aLIGO%20BSC%20ISI.pdf",
+      "filename": "D1000908-v3 HOUSING LOCKER SLEEVE, aLIGO BSC ISI.pdf",
+      "sha256": "ae658f0193297ca859685ce795a728e4706f8ad5d3ec3c11a3f5787c4a5a350e",
+      "bytes": 32875
+    },
+    {
+      "document": "D1000908",
+      "url": "https://dcc.ligo.org/public/0010/D1000908/003/D1000908%20HOUSING%20LOCKER%20SLEEVE%2C%20aLIGO%20BSC%20ISI.SLDPRT",
+      "filename": "D1000908 HOUSING LOCKER SLEEVE, aLIGO BSC ISI.SLDPRT",
+      "sha256": "2726a32dd313de5d09a8d8d437ff9bb493c6ba1bbcb7a5e3cec7971d25f72ac0",
+      "bytes": 626176
+    },
+    {
+      "document": "E1000615",
+      "url": "https://dcc.ligo.org/public/0022/E1000615/003/E1000615-v3%20aLIGO%20BSC%20ISI%20Lockers%20Assembly%20Procedure.docx",
+      "filename": "E1000615-v3 aLIGO BSC ISI Lockers Assembly Procedure.docx",
+      "sha256": "aa15d428f9f0e6f29c0b4e6f300a4215c79226f36ed7317021e00757013fa4ff",
+      "bytes": 1495898
+    },
+    {
+      "document": "D1000860-v1",
+      "url": "https://dcc.ligo.org/public/0010/D1000860/001/D1000860-V1%2C%20Stage%200-1%20Locker%2C%20aLIGO%20BSC-ISI.pdf",
+      "filename": "D1000860-V1, Stage 0-1 Locker, aLIGO BSC-ISI.pdf",
+      "sha256": "4d6f8e60d5cffc4f9e6694e7a029c240a23285753ee18656dc8af887a1bdf449",
+      "bytes": 29684
+    }
+  ],
+  "change_record": "https://dcc.ligo.org/LIGO-E1000353/public"
+}
